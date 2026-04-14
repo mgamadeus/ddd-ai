@@ -231,6 +231,22 @@ class AIModel extends Entity
     public const string MODEL_OPENAI_GPT5_4_PRO = 'OPENAI.GPT5_4_PRO';
 
     /**
+     * @var string OpenAI GPT-5.4 Mini Model
+     * @description Fast, cost-efficient GPT-5.4 variant close to flagship performance. Ideal for coding assistants and subagents.
+     * @usage Use for coding assistance, subagent orchestration, or complex tasks where speed and cost matter. 400K context (272K input, 128K output).
+     * @notes Training cutoff: August 2025. Reasoning model with vision. $0.75/$4.50 per 1M tokens.
+     */
+    public const string MODEL_OPENAI_GPT5_4_MINI = 'OPENAI.GPT5_4_MINI';
+
+    /**
+     * @var string OpenAI GPT-5.4 Nano Model
+     * @description Smallest, cheapest GPT-5.4 variant (API-only). Best for classification, extraction, ranking, and subagents.
+     * @usage Use for high-volume classification, data extraction, ranking, or lightweight subagent tasks. 400K context (272K input, 128K output).
+     * @notes Training cutoff: August 2025. Reasoning model with vision. $0.20/$1.25 per 1M tokens.
+     */
+    public const string MODEL_OPENAI_GPT5_4_NANO = 'OPENAI.GPT5_4_NANO';
+
+    /**
      * @var string OpenAI text-embedding-3-small
      * @description Efficient embeddings model for semantic search / RAG.
      */
