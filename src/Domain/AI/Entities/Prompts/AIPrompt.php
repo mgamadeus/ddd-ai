@@ -12,36 +12,6 @@ use DDD\Domain\Base\Entities\Entity;
  */
 class AIPrompt extends Entity
 {
-    /** @var string Prompt for Entity translations with Translatable  */
-    public const string APP_TRANSLATIONS_ENTITY_TRANSLATABLE = 'Common.Translations.Entity.Translatable';
-
-    /** @var string Prompt for App UI translations (single locale, informal tone) */
-    public const string APP_TRANSLATIONS_APP_TRANSLATIONS_SINGLE_LOCALE_INFORMAL = 'Common.Translations.AppTranslations.SingleLocaleInformal';
-
-    /** @var string Prompt for App UI translations (single locale, formal tone) */
-    public const string APP_TRANSLATIONS_APP_TRANSLATIONS_SINGLE_LOCALE_FORMAL = 'Common.Translations.AppTranslations.SingleLocaleFormal';
-
-    /** @var string Handles Support cases of type track creation */
-    public const string APP_SUPPORT_TRACKS_TRACK_GENERATOR = 'Support.Tracks.TrackGenerator';
-
-    /** @var string Extracts the date of the most recent customer writing in a support conversation */
-    public const string APP_SUPPORT_TRACKS_REQUEST_DATE_EXTRACTOR = 'Support.Tracks.RequestDateExtractor';
-
-    /** @var string Generates high-detail MediaItem descriptions based on images */
-    public const string APP_COMMON_MEDIAITEMS_IMAGE_DESCRIPTION_GENERATOR = 'Common.MediaItems.ImageDescriptionGenerator';
-
-    /** @var string Detects the primary language code of a text */
-    public const string APP_COMMON_TEXTS_DETECTED_LANGUAGE = 'Common.Texts.DetectedLanguage';
-
-    /** @var string Extracts only the new message content from a raw email body (strips reply chains, signatures, disclaimers) */
-    public const string APP_SUPPORT_SUPPORT_EMAILS_CLEANED_BODY = 'Support.SupportEmails.CleanedBody';
-
-    /** @var string Extracts the first message content from a raw email body (keeps signature, strips disclaimers) */
-    public const string APP_SUPPORT_SUPPORT_EMAILS_CLEANED_BODY_FIRST_MESSAGE = 'Support.SupportEmails.CleanedBodyFirstMessage';
-
-    /** @var string Generates a short title and summary from first customer messages of a support ticket */
-    public const string APP_SUPPORT_TICKETS_SUMMARY_AND_TITLE_GENERATOR = 'Support.Tickets.SummaryAndTitleGenerator';
-
     /** @var string The name of the AIPrompt */
     public string $name;
 

@@ -3,7 +3,7 @@
     "description": "AI model management, prompt system, and Argus AI integration traits for mgamadeus/ddd",
     "minimum-stability": "stable",
     "license": "MIT",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "authors": [
         {
             "name": "Marius-Eugen Gerdan",
@@ -16,10 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "DDD\\Modules\\AI\\": "src/",
-            "DDD\\Domain\\AI\\": "src/Domain/AI/",
-            "DDD\\Domain\\Batch\\Services\\": "src/Domain/Batch/Services/",
-            "DDD\\Presentation\\Api\\Batch\\AI\\": "src/Presentation/Api/Batch/AI/"
+            "DDD\\": "src/"
         }
     },
     "extra": {
