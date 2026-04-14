@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace DDD\Presentation\Api\Batch\AI;
 
-use DDD\Domain\Batch\Services\OpenAIService;
-use DDD\Domain\Batch\Services\OpenRouterService;
+use DDD\Domain\Batch\Services\AI\OpenAIService;
+use DDD\Domain\Batch\Services\AI\OpenRouterService;
 use DDD\Presentation\Api\Batch\Base\Dtos\BatchReponseDto;
 use DDD\Infrastructure\Exceptions\BadRequestException;
 use DDD\Infrastructure\Exceptions\InternalErrorException;

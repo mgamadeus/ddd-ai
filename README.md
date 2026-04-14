@@ -41,6 +41,21 @@ The AI module itself requires no environment variables. The underlying Argus mod
 
 AI batch services require the OpenRouter/OpenAI API keys to be configured in the Argus batch gateway.
 
+## Service registration
+
+Add to your project's `services.yaml`:
+
+```yaml
+# DDD Module: ddd-ai
+DDD\Domain\AI\Services\:
+    resource: '%kernel.project_dir%/vendor/mgamadeus/ddd-ai/src/Domain/AI/Services/*'
+    public: true
+
+DDD\Domain\Batch\Services\AI\:
+    resource: '%kernel.project_dir%/vendor/mgamadeus/ddd-ai/src/Domain/Batch/Services/AI/*'
+    public: true
+```
+
 ## Usage
 
 ### Adding AI to an Argus repo entity

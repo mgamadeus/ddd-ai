@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DDD\Domain\Batch\Services;
+namespace DDD\Domain\Batch\Services\AI;
 
 use DDD\Infrastructure\Exceptions\ExceptionDetails;
 use DDD\Infrastructure\Exceptions\InternalErrorException;
@@ -13,7 +13,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use stdClass;
 use Throwable;
 
-class OpenAIService extends Service
+class OpenRouterService extends Service
 {
     protected Client $guzzleClient;
 
@@ -21,60 +21,36 @@ class OpenAIService extends Service
 
     public function __construct()
     {
-        $this->apiKey = Config::getEnv('OPEN_AI_KEY');
+        $this->apiKey = Config::getEnv('OPENROUTER_KEY');
 
-        // Initialize Guzzle client
         $this->guzzleClient = new Client([
-            'base_uri' => 'https://api.openai.com',
+            'base_uri' => 'https://openrouter.ai',
             'timeout' => 5 * 60,
         ]);
     }
 
-    /**
-     * Calls the OpenAI Chat Completions endpoint
-     * @param stdClass $input
-     * @return stdClass|null
-     * @throws InternalErrorException
-     */
     public function chatCompletions(stdClass $input): ?stdClass
     {
-        try {
-            // Convert stdClass to array for JSON encoding
-            $payload = json_decode(json_encode($input), true);
+        return $this->executePost('/api/v1/chat/completions', $input);
+    }
 
-            // Make synchronous POST request to chat completions endpoint
-            $response = $this->guzzleClient->post('/v1/chat/completions', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => "Bearer {$this->apiKey}",
-                ],
-                'json' => $payload,
-            ]);
-
-            // Decode response body and return as stdClass
-            $responseBody = $response->getBody()->getContents();
-            return json_decode($responseBody);
-        } catch (GuzzleException $e) {
-            return $this->handleGuzzleException($e);
-        } catch (Throwable $t) {
-            return $this->handleUnexpectedException($t);
-        }
+    public function createEmbedding(stdClass $input): ?stdClass
+    {
+        return $this->executePost('/api/v1/embeddings', $input);
     }
 
     /**
-     * Calls the OpenAI Embeddings endpoint
+     * @param string $endpoint
      * @param stdClass $input
      * @return stdClass|null
      * @throws InternalErrorException
      */
-    public function createEmbedding(stdClass $input): ?stdClass
+    protected function executePost(string $endpoint, stdClass $input): ?stdClass
     {
         try {
-            // Convert stdClass to array for JSON encoding
             $payload = json_decode(json_encode($input), true);
 
-            // Make synchronous POST request to embeddings endpoint
-            $response = $this->guzzleClient->post('/v1/embeddings', [
+            $response = $this->guzzleClient->post($endpoint, [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => "Bearer {$this->apiKey}",
@@ -82,7 +58,6 @@ class OpenAIService extends Service
                 'json' => $payload,
             ]);
 
-            // Decode response body and return as stdClass
             $responseBody = $response->getBody()->getContents();
             return json_decode($responseBody);
         } catch (GuzzleException $e) {
@@ -93,7 +68,6 @@ class OpenAIService extends Service
     }
 
     /**
-     * Centralized Guzzle exception handling
      * @param GuzzleException $e
      * @return stdClass|null
      * @throws InternalErrorException
@@ -101,32 +75,32 @@ class OpenAIService extends Service
     protected function handleGuzzleException(GuzzleException $e): ?stdClass
     {
         $exceptionDetails = new ExceptionDetails();
-        $errorMessage = 'OpenAI API Error';
-        
-        if ($e->hasResponse()) {
+        $errorMessage = 'OpenRouter API Error';
+
+        if (method_exists($e, 'hasResponse') && $e->hasResponse()) {
             $errorBody = $e->getResponse()->getBody()->getContents();
             $errorData = json_decode($errorBody, true);
-            
+
             if ($errorData && isset($errorData['error']['message'])) {
                 $errorMessage = $errorData['error']['message'];
             }
-            
-            $exceptionDetails->addDetail('OpenAI Error', [
+
+            $exceptionDetails->addDetail('OpenRouter Error', [
                 'statusCode' => $e->getResponse()->getStatusCode(),
-                'response' => $errorBody
+                'response' => $errorBody,
             ]);
         }
-        
+
         $exceptionDetails->addDetail('Guzzle Exception', ['message' => $e->getMessage()]);
-        
+
         if ($this->throwErrors) {
             throw new InternalErrorException($errorMessage, $exceptionDetails);
         }
+
         return null;
     }
 
     /**
-     * Centralized unexpected exception handling
      * @param Throwable $t
      * @return stdClass|null
      * @throws InternalErrorException
@@ -138,6 +112,7 @@ class OpenAIService extends Service
             $exceptionDetails->addDetail('Unexpected Error', ['message' => $t->getMessage()]);
             throw new InternalErrorException('Unexpected error', $exceptionDetails);
         }
+
         return null;
     }
 }
