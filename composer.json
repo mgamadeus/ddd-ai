@@ -11,7 +11,8 @@
         }
     ],
     "require": {
-        "mgamadeus/ddd-argus": "^1.0"
+        "mgamadeus/ddd-argus": "^1.0",
+        "mgamadeus/ddd": "^2.10"
     },
     "autoload": {
         "psr-4": {
@@ -21,5 +22,10 @@
     },
     "extra": {
         "ddd-module": "DDD\\Modules\\AI\\AIModule"
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/runtime": true
+        }
     }
 }
