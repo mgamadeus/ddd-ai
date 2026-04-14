@@ -22,6 +22,14 @@ class AIModule extends DDDModule
     {
         return [
             'DDD\\Domain\\AI\\Services\\',
+            'DDD\\Domain\\Batch\\Services\\',
+        ];
+    }
+
+    public static function getControllerPaths(): array
+    {
+        return [
+            '/api/batch' => __DIR__ . '/Presentation/Api/Batch',
         ];
     }
 }
