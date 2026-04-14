@@ -11,8 +11,6 @@ use DDD\Domain\AI\Repo\Argus\Attributes\ArgusLanguageModel;
 use DDD\Domain\Base\Repo\Argus\Traits\ArgusTrait;
 use DDD\Domain\Base\Repo\Argus\Utils\ArgusApiOperation;
 use DDD\Domain\Common\Entities\Accounts\Account;
-use DDD\Domain\Common\Entities\Money\MoneyAmount;
-use DDD\Infrastructure\Services\AppService;
 use DDD\Domain\Common\Entities\MediaItems\GenericMediaItem;
 use DDD\Domain\Common\Entities\MediaItems\Photo;
 use DDD\Infrastructure\Exceptions\BadRequestException;
@@ -45,9 +43,6 @@ trait ArgusAILanguageModelTrait
 
     /** @var int The amount of tokens used for the AI service */
     protected int $consumedTokens = 0;
-
-    /** @var MoneyAmount|null The costs for AI Service usage */
-    protected ?MoneyAmount $aiCosts = null;
 
     /** @var float The temperature is a parameter that controls the randomness of the LLM's output. A higher temperature will result in more creative and imaginative text, while a lower temperature will result in more accurate and factual text */
     protected float $temperature = 0.8;
@@ -333,7 +328,7 @@ trait ArgusAILanguageModelTrait
         if ($aiModel->vendor === AIModel::VENDOR_GOOGLE) {
             // System instruction (optional)
             $systemPrompt = method_exists($this, 'getSystemPrompt') ? $this->getSystemPrompt() : null;
-            $systemInstruction = $systemPrompt ? (string)$systemPrompt->getPromtTextWithParametersApplied() : '';
+            $systemInstruction = $systemPrompt ? $systemPrompt->getPromtTextWithParametersApplied() : '';
 
             // Task-specific prompt that we always lead with
             $taskSpecificPrompt = $this->getAIPromptWithParametersAppliedCached()->getPromtTextWithParametersApplied();
@@ -372,7 +367,7 @@ trait ArgusAILanguageModelTrait
                     foreach ($this->userContent as $msg) {
                         $content = $msg['content'] ?? null;
                         if (is_string($content)) {
-                            $parts[] = ['text' => (string)$content];
+                            $parts[] = ['text' => $content];
                         } elseif (is_array($content)) {
                             foreach ($content as $part) {
                                 if (($part['type'] ?? null) === 'text' && isset($part['text'])) {
@@ -453,9 +448,9 @@ trait ArgusAILanguageModelTrait
 
         // --- Token limit param differs by model family ---
         if ($aiModel->isReasoningModel) {
-            $return['body']['max_completion_tokens'] = (int)$aiModel->settings->maxOutputTokens;
+            $return['body']['max_completion_tokens'] = $aiModel->settings->maxOutputTokens;
         } else {
-            $return['body']['max_tokens'] = (int)$aiModel->settings->maxOutputTokens;
+            $return['body']['max_tokens'] = $aiModel->settings->maxOutputTokens;
             $return['body']['temperature'] = $this->getTemperature();
         }
 

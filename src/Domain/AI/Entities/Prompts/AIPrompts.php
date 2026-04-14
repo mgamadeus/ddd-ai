@@ -16,5 +16,5 @@ use DDD\Domain\Base\Entities\EntitySet;
  */
 class AIPrompts extends EntitySet
 {
-    public const SERVICE_NAME = AIPromptsService::class;
+    public const string SERVICE_NAME = AIPromptsService::class;
 }

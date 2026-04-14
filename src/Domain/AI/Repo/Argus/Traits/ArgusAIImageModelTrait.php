@@ -52,7 +52,7 @@ trait ArgusAIImageModelTrait
             $this->postProcessLoadResponse($callResponseData, false);
             return;
         }
-        $loadResult = $responseObject->images ?? [];
+        $loadResult = $responseObject->images ?? '';
         if (!$loadResult) {
             $this->postProcessLoadResponse($callResponseData, false);
             return;
