@@ -38,27 +38,7 @@ class OpenAIService extends Service
      */
     public function chatCompletions(stdClass $input): ?stdClass
     {
-        try {
-            // Convert stdClass to array for JSON encoding
-            $payload = json_decode(json_encode($input), true);
-
-            // Make synchronous POST request to chat completions endpoint
-            $response = $this->guzzleClient->post('/v1/chat/completions', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => "Bearer {$this->apiKey}",
-                ],
-                'json' => $payload,
-            ]);
-
-            // Decode response body and return as stdClass
-            $responseBody = $response->getBody()->getContents();
-            return json_decode($responseBody);
-        } catch (GuzzleException $e) {
-            return $this->handleGuzzleException($e);
-        } catch (Throwable $t) {
-            return $this->handleUnexpectedException($t);
-        }
+        return $this->executePost('/v1/chat/completions', $input);
     }
 
     /**
@@ -69,12 +49,22 @@ class OpenAIService extends Service
      */
     public function createEmbedding(stdClass $input): ?stdClass
     {
+        return $this->executePost('/v1/embeddings', $input);
+    }
+
+    /**
+     * @param string $endpoint
+     * @param stdClass $input
+     * @return stdClass|null
+     * @throws InternalErrorException
+     */
+    protected function executePost(string $endpoint, stdClass $input): ?stdClass
+    {
         try {
             // Convert stdClass to array for JSON encoding
             $payload = json_decode(json_encode($input), true);
 
-            // Make synchronous POST request to embeddings endpoint
-            $response = $this->guzzleClient->post('/v1/embeddings', [
+            $response = $this->guzzleClient->post($endpoint, [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => "Bearer {$this->apiKey}",
