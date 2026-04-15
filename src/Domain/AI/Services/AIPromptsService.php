@@ -7,6 +7,7 @@ namespace DDD\Domain\AI\Services;
 use DDD\Domain\AI\Entities\Prompts\AIPrompt;
 use DDD\Infrastructure\Exceptions\NotFoundException;
 use DDD\Infrastructure\Libs\Config;
+use DDD\Infrastructure\Services\DDDService;
 use DDD\Infrastructure\Services\Service;
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
