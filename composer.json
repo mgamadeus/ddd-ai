@@ -3,7 +3,7 @@
     "description": "AI model management, prompt system, and Argus AI integration traits for mgamadeus/ddd",
     "minimum-stability": "stable",
     "license": "MIT",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "authors": [
         {
             "name": "Marius-Eugen Gerdan",
@@ -12,7 +12,9 @@
     ],
     "require": {
         "mgamadeus/ddd-argus": "^1.0",
-        "mgamadeus/ddd": "^2.10"
+        "mgamadeus/ddd": "^2.10",
+        "mgamadeus/ddd-common-money": "^1.0",
+        "gioni06/gpt3-tokenizer": "^1.2"
     },
     "autoload": {
         "psr-4": {

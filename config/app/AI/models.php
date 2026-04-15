@@ -1,6 +1,6 @@
 <?php
 
-use App\Domain\AI\Entities\Models\AIModel;
+use DDD\Domain\AI\Entities\Models\AIModel;
 
 return [
     // ── GPT-4o family (still widely used, multimodal) ──────────────────────
