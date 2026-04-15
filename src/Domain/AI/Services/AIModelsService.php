@@ -22,11 +22,9 @@ class AIModelsService extends Service
     public function getAIModels(): AIModels
     {
         $aiModelsConfig = Config::get('AI.models');
-
-        /** @var AIModels $classIsntance */
-        $classIsntance = DDDService::instance()->getService(AIModels::class);
-        $className = $classIsntance::class;
-        $aiModels = new $className();
+        $entiySetClassName = DDDService::instance()->getContainerServiceClassNameForClass(AIModels::class);
+        /** @var AIModels $aiModels */
+        $aiModels = new $entiySetClassName();
 
         foreach ($aiModelsConfig as $modelKey => $modelConfig) {
             $model = $this->createAIModelFromConfig($modelKey, $modelConfig);
@@ -38,10 +36,9 @@ class AIModelsService extends Service
 
     protected function createAIModelFromConfig(string $modelKey, array $modelConfig): AIModel
     {
-        /** @var AIModel $classIsntance */
-        $classIsntance = DDDService::instance()->getService(AIModel::class);
-        $className = $classIsntance::class;
-        $aiModel = new $className();
+        $entiyClassName = DDDService::instance()->getContainerServiceClassNameForClass(AIModel::class);
+        /** @var AIModel $aiModel */
+        $aiModel = new $entiyClassName();
         $aiModel->type = $modelConfig['type'];
         $aiModel->vendor = $modelConfig['vendor'];
         $aiModel->name = $modelKey;

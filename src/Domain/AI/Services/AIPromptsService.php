@@ -80,7 +80,9 @@ class AIPromptsService extends Service
             return null;
         }
 
-        $aiPrompt = new AIPrompt();
+        $entityClassName = DDDService::instance()->getContainerServiceClassNameForClass(AIPrompt::class);
+        /** @var AIPrompt $aiPrompt */
+        $aiPrompt = new $entityClassName();
         $aiPrompt->name = $promptName;
         $aiPrompt->promtText = $promtText;
 
