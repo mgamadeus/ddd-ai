@@ -12,7 +12,9 @@ use DDD\Domain\Base\Repo\Argus\Traits\ArgusTrait;
 use DDD\Domain\Base\Repo\Argus\Utils\ArgusApiOperation;
 use DDD\Domain\Common\Entities\Accounts\Account;
 use DDD\Domain\Common\Entities\MediaItems\GenericMediaItem;
+use DDD\Domain\Common\Entities\MediaItems\MediaItem;
 use DDD\Domain\Common\Entities\MediaItems\Photo;
+use DDD\Domain\Common\Entities\Money\MoneyAmount;
 use DDD\Infrastructure\Exceptions\BadRequestException;
 use DDD\Infrastructure\Exceptions\InternalErrorException;
 use DDD\Infrastructure\Exceptions\NotFoundException;
@@ -43,6 +45,9 @@ trait ArgusAILanguageModelTrait
 
     /** @var int The amount of tokens used for the AI service */
     protected int $consumedTokens = 0;
+
+    /** @var MoneyAmount|null The costs for AI Service usage */
+    protected ?MoneyAmount $aiCosts = null;
 
     /** @var float The temperature is a parameter that controls the randomness of the LLM's output. A higher temperature will result in more creative and imaginative text, while a lower temperature will result in more accurate and factual text */
     protected float $temperature = 0.8;
@@ -280,7 +285,7 @@ trait ArgusAILanguageModelTrait
             foreach ($this->userContent as $i => $element) {
                 // Case A: top-level content-part style: ['type' => 'image_url', 'image_url' => ['image' => Photo|GenericMediaItem]]
                 if (isset($element['type']) && $element['type'] === 'image_url') {
-                    if (!isset($element['image_url']['image']) || !($element['image_url']['image'] instanceof Photo || $element['image_url']['image'] instanceof GenericMediaItem)) {
+                    if (!isset($element['image_url']['image']) || !($element['image_url']['image'] instanceof Photo || $element['image_url']['image'] instanceof GenericMediaItem || $element['image_url']['image'] instanceof MediaItem)) {
                         throw new InternalErrorException(
                             "User Content of type 'image_url' must contain key 'image' with an instance of Photo or GenericMediaItem"
                         );
@@ -422,7 +427,18 @@ trait ArgusAILanguageModelTrait
             return ['body' => $body];
         }
 
-        // --- OpenAI Chat Completions vendor path (default) ---
+        // --- OpenAI / OpenRouter Chat Completions vendor path (default) ---
+        $loadEndpoint = (string)($this->argusSettings->argusLoad->loadEndpoint ?? '');
+        $isOpenRouterEndpoint = str_contains(strtolower($loadEndpoint), 'openrouter');
+
+        $modelExternalId = $aiModel->externalId;
+        if ($isOpenRouterEndpoint) {
+            if (!($aiModel->openRouterExternalId ?? null)) {
+                throw new InternalErrorException("No openRouterExternalId configured for model '{$aiModel->name}'");
+            }
+            $modelExternalId = $aiModel->openRouterExternalId;
+        }
+
         $messages = [];
         if ($userContentHasCompleteFormat && is_array($this->userContent)) {
             // Pass through user-provided messages as-is
@@ -440,17 +456,16 @@ trait ArgusAILanguageModelTrait
 
         $return = [
             'body' => [
-                /* 'api_key' => Config::getEnv('API_OPENAI_KEY'), */
-                'model'       => $aiModel->externalId,
+                'model'       => $modelExternalId,
                 'messages'    => $messages,
             ],
         ];
 
         // --- Token limit param differs by model family ---
         if ($aiModel->isReasoningModel) {
-            $return['body']['max_completion_tokens'] = $aiModel->settings->maxOutputTokens;
+            $return['body']['max_completion_tokens'] = (int)$aiModel->settings->maxOutputTokens;
         } else {
-            $return['body']['max_tokens'] = $aiModel->settings->maxOutputTokens;
+            $return['body']['max_tokens'] = (int)$aiModel->settings->maxOutputTokens;
             $return['body']['temperature'] = $this->getTemperature();
         }
 
