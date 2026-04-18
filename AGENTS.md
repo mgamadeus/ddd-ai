@@ -6,7 +6,7 @@ AI model management, prompt system, and Argus AI integration traits for the `mga
 **Namespace:** `DDD\`
 **Depends on:** `mgamadeus/ddd` (^2.10), `mgamadeus/ddd-argus` (^1.0), `mgamadeus/ddd-common-money` (^1.0)
 
-> **This module follows all DDD Core conventions.** For base patterns, see skills in `vendor/mgamadeus/ddd`. For Argus patterns, see `vendor/mgamadeus/ddd-argus`.
+> **This module follows all DDD Core conventions.** For base patterns, see `vendor/mgamadeus/ddd/AGENTS.md` and skills in `vendor/mgamadeus/ddd`. For Argus patterns, see `vendor/mgamadeus/ddd-argus`.
 
 ## Architecture
 
