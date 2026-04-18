@@ -1,5 +1,5 @@
 ---
-name: ai-module-specialist
+name: ddd-module-ai-specialist
 description: Work with AI models, prompts, cost tracking, and Argus AI integration from the ddd-ai module. Use when adding LLM/image/embedding capabilities to entities, managing prompts, or estimating AI costs.
 metadata:
   author: mgamadeus

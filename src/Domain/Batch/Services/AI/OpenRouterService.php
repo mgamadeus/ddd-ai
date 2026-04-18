@@ -53,7 +53,7 @@ class OpenRouterService extends Service
             $response = $this->guzzleClient->post($endpoint, [
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Authorization' => "Bearer {$this->apiKey}",
+                    'Authorization' => "Bearer $this->apiKey",
                 ],
                 'json' => $payload,
             ]);

@@ -434,7 +434,7 @@ trait ArgusAILanguageModelTrait
         $modelExternalId = $aiModel->externalId;
         if ($isOpenRouterEndpoint) {
             if (!($aiModel->openRouterExternalId ?? null)) {
-                throw new InternalErrorException("No openRouterExternalId configured for model '{$aiModel->name}'");
+                throw new InternalErrorException("No openRouterExternalId configured for model '$aiModel->name'");
             }
             $modelExternalId = $aiModel->openRouterExternalId;
         }
@@ -463,9 +463,9 @@ trait ArgusAILanguageModelTrait
 
         // --- Token limit param differs by model family ---
         if ($aiModel->isReasoningModel) {
-            $return['body']['max_completion_tokens'] = (int)$aiModel->settings->maxOutputTokens;
+            $return['body']['max_completion_tokens'] = $aiModel->settings->maxOutputTokens;
         } else {
-            $return['body']['max_tokens'] = (int)$aiModel->settings->maxOutputTokens;
+            $return['body']['max_tokens'] = $aiModel->settings->maxOutputTokens;
             $return['body']['temperature'] = $this->getTemperature();
         }
 

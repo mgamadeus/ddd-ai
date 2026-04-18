@@ -75,7 +75,7 @@ class AIPromptsService extends Service
 
         if ($promtText === null || !is_string($promtText)) {
             if ($this->throwErrors) {
-                throw new NotFoundException("AIPrompt not found: {$promptName}");
+                throw new NotFoundException("AIPrompt not found: $promptName");
             }
             return null;
         }
