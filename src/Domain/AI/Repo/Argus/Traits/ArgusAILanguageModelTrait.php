@@ -329,8 +329,10 @@ trait ArgusAILanguageModelTrait
             }
         }
 
-        // --- Google Gemini vendor path ---
-        if ($aiModel->vendor === AIModel::VENDOR_GOOGLE) {
+        $loadEndpoint = (string)($this->argusSettings->argusLoad->loadEndpoint ?? '');
+        $isOpenRouterEndpoint = str_contains(strtolower($loadEndpoint), 'openrouter');
+
+        if ($aiModel->vendor === AIModel::VENDOR_GOOGLE && !$isOpenRouterEndpoint) {
             // System instruction (optional)
             $systemPrompt = method_exists($this, 'getSystemPrompt') ? $this->getSystemPrompt() : null;
             $systemInstruction = $systemPrompt ? $systemPrompt->getPromtTextWithParametersApplied() : '';
@@ -426,10 +428,6 @@ trait ArgusAILanguageModelTrait
 
             return ['body' => $body];
         }
-
-        // --- OpenAI / OpenRouter Chat Completions vendor path (default) ---
-        $loadEndpoint = (string)($this->argusSettings->argusLoad->loadEndpoint ?? '');
-        $isOpenRouterEndpoint = str_contains(strtolower($loadEndpoint), 'openrouter');
 
         $modelExternalId = $aiModel->externalId;
         if ($isOpenRouterEndpoint) {
