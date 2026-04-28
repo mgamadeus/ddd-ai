@@ -479,6 +479,16 @@ trait ArgusAILanguageModelTrait
             }
         }
 
+        if ($isOpenRouterEndpoint
+            && $argusLanguageModel
+            && !empty($argusLanguageModel->preferredProviders)
+        ) {
+            $return['body']['provider'] = [
+                'order'           => array_values($argusLanguageModel->preferredProviders),
+                'allow_fallbacks' => true,
+            ];
+        }
+
         return $return;
     }
 

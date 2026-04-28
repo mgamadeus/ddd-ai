@@ -52,6 +52,13 @@ class ArgusLanguageModel
     public ?int $systemPromptVersion = null;
 
     /**
+     * @var string[]|null Ordered list of OpenRouter provider slugs to prefer (e.g. ['groq', 'cerebras']).
+     * Only applied when the load endpoint targets OpenRouter. Translated into the OpenRouter
+     * `provider.order` body parameter with `allow_fallbacks: true`.
+     */
+    public ?array $preferredProviders = null;
+
+    /**
      * @param string|null $defaultAIModelName
      * @param string|null $defaultAIPromptName
      * @param int|null $defaultAIPromptVersion
@@ -59,6 +66,7 @@ class ArgusLanguageModel
      * @param string|null $responseFormat
      * @param string|null $systemPromptName
      * @param int|null $systemPromptVersion
+     * @param string[]|null $preferredProviders
      */
     public function __construct(
         ?string $defaultAIModelName = null,
@@ -68,6 +76,7 @@ class ArgusLanguageModel
         ?string $responseFormat = self::RESPONSE_FORMAT_DEFAULT,
         ?string $systemPromptName = null,
         ?int $systemPromptVersion = null,
+        ?array $preferredProviders = null,
     ) {
         $this->defaultAIModelName = $defaultAIModelName;
         $this->defaultAIPromptName = $defaultAIPromptName;
@@ -76,5 +85,6 @@ class ArgusLanguageModel
         $this->responseFormat = $responseFormat;
         $this->systemPromptName = $systemPromptName;
         $this->systemPromptVersion = $systemPromptVersion;
+        $this->preferredProviders = $preferredProviders;
     }
 }

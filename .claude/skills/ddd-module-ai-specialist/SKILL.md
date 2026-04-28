@@ -88,10 +88,13 @@ class ArgusMyAnalysis extends MyAnalysis
     temperature: 0.8,                                       // 0.0-1.0+ (skipped for reasoning models)
     responseFormat: ArgusLanguageModel::RESPONSE_FORMAT_JSON_OBJECT, // or DEFAULT
     systemPromptName: 'MyApp.System.Instructions',          // Optional system prompt
+    preferredProviders: ['groq', 'cerebras'],               // OpenRouter-only: ordered provider preference
 )]
 ```
 
 Response formats: `RESPONSE_FORMAT_DEFAULT` (free text), `RESPONSE_FORMAT_JSON_OBJECT` (forces JSON output)
+
+**`preferredProviders`** (OpenRouter only): Ordered list of provider slugs to prefer (e.g. `['groq', 'cerebras']`). Translated into the OpenRouter `provider.order` body parameter with `allow_fallbacks: true`. Has no effect when the load endpoint targets OpenAI directly.
 
 ## AIModel (60+ Models)
 
