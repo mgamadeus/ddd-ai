@@ -4,7 +4,9 @@ declare (strict_types=1);
 
 namespace DDD\Domain\AI\Entities\Models;
 
+use DDD\Domain\AI\Entities\Models\Settings\AIImageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AILanguageModelSetting;
+use DDD\Domain\AI\Entities\Models\Settings\AIModelSetting;
 use DDD\Domain\AI\Entities\Prompts\AIPrompt;
 use DDD\Domain\AI\Services\AIModelsService;
 use DDD\Domain\AI\Services\AIPromptsService;
@@ -12,6 +14,7 @@ use DDD\Domain\Common\Entities\Money\MoneyAmount;
 use DDD\Domain\Base\Entities\ChangeHistory\ChangeHistoryTrait;
 use DDD\Domain\Base\Entities\Entity;
 use DDD\Domain\Base\Repo\DB\Database\DatabaseIndex;
+use DDD\Domain\Common\Entities\MediaItems\GenericMediaItem;
 use DDD\Domain\Common\Entities\MediaItems\GenericMediaItemContent;
 use DDD\Domain\Common\Entities\MediaItems\Photo;
 use DDD\Infrastructure\Exceptions\BadRequestException;
@@ -58,11 +61,20 @@ class AIModel extends Entity
     /** @var string Model Vendor FALAI */
     public const string VENDOR_FALAI = 'FALAI';
 
+    /** @var string Model Vendor Perplexity */
+    public const string VENDOR_PERPLEXITY = 'PERPLEXITY';
+
     /**
      * @var string Reasoning effort: none (fastest, minimal thinking)
      * @description Use when you want maximum speed and minimal reasoning.
      */
     public const string REASONING_EFFORT_NONE = 'none';
+
+    /**
+     * @var string Reasoning effort: minimal (faster than low, almost no thinking)
+     * @description Use when you want near-no-reasoning behavior but still slightly more than NONE.
+     */
+    public const string REASONING_EFFORT_MINIMAL = 'minimal';
 
     /**
      * @var string Reasoning effort: low (fast, light reasoning)
@@ -371,6 +383,45 @@ class AIModel extends Entity
     /** @var string Google Gemini 3.0 Pro Preview */
     public const string MODEL_GOOGLE_GEMINI_3_0_PRO_PREVIEW = 'GOOGLE.GEMINI_3_0_PRO_PREVIEW';
 
+    /** @var string Google Gemini 2.5 Flash Image (non-preview / stable) */
+    public const string MODEL_GOOGLE_GEMINI_2_5_FLASH_IMAGE = 'GOOGLE.GEMINI_2_5_FLASH_IMAGE';
+
+    /** @var string Google Gemini 3.0 Flash Preview */
+    public const string MODEL_GOOGLE_GEMINI_3_0_FLASH_PREVIEW = 'GOOGLE.GEMINI_3_0_FLASH_PREVIEW';
+
+    /** @var string Google Gemini 3.1 Flash Image Preview */
+    public const string MODEL_GOOGLE_GEMINI_3_1_FLASH_IMAGE_PREVIEW = 'GOOGLE.GEMINI_3_1_FLASH_IMAGE_PREVIEW';
+
+    /** @var string Google Gemini 3.1 Flash Lite */
+    public const string MODEL_GOOGLE_GEMINI_3_1_FLASH_LITE = 'GOOGLE.GEMINI_3_1_FLASH_LITE';
+
+    /** @var string Google Gemini 3.1 Pro Preview */
+    public const string MODEL_GOOGLE_GEMINI_3_1_PRO_PREVIEW = 'GOOGLE.GEMINI_3_1_PRO_PREVIEW';
+
+    /**
+     * @var string OpenAI GPT-4 legacy Model
+     * @description Legacy GPT-4 (no vision, pre-multimodal). Kept for backwards compatibility with older integrations.
+     */
+    public const string MODEL_OPENAI_GPT4 = 'OPENAI.GPT4';
+
+    /**
+     * @var string OpenAI GPT-5 Search API Model
+     * @description GPT-5 routed through the Responses API with native `web_search` tool. Use for web-grounded answers with citations.
+     */
+    public const string MODEL_OPENAI_GPT5_SEARCH_API = 'OPENAI.GPT5_SEARCH_API';
+
+    /**
+     * @var string OpenAI GPT-5 Chat Model
+     * @description GPT-5 Chat Completions variant (non-Responses-API). Use for general chat workloads where reasoning effort / tool use is not needed.
+     */
+    public const string MODEL_OPENAI_GPT5_CHAT = 'OPENAI.GPT5_CHAT';
+
+    /**
+     * @var string Perplexity Sonar Model
+     * @description Perplexity's web-grounded search model with native citations. Returns answers + search results. 128K context.
+     */
+    public const string MODEL_PERPLEXITY_SONAR = 'PERPLEXITY.SONAR';
+
     /** @var string The type of the Model */
     #[Choice(callback: [self::class, 'getModelTypes'])]
     public string $type;
@@ -399,8 +450,12 @@ class AIModel extends Entity
     /** @var bool|null If true, model accepts multi-modal input and can process images */
     public ?bool $hasVisionCapabilities = false;
 
-    /** @var AILanguageModelSetting The Settings of the Model */
-    public AILanguageModelSetting $settings;
+    /**
+     * @var AILanguageModelSetting|AIImageModelSetting The Settings of the Model.
+     *      Hydrated as AILanguageModelSetting for TYPE_LANGUAGE / TYPE_AUDIO / TYPE_EMBEDDINGS,
+     *      and as AIImageModelSetting for TYPE_IMAGE.
+     */
+    public AILanguageModelSetting|AIImageModelSetting $settings;
 
     /**
      * Return all model types based on class constants
@@ -513,13 +568,13 @@ class AIModel extends Entity
 
 
     /**
-     * Calculate token count for a given Photo object based on detail level
+     * Calculate token count for a given Photo/GenericMediaItem object based on detail level
      *
-     * @param Photo $photo The Photo object to calculate cost for
+     * @param Photo|GenericMediaItem $photo The media item to calculate cost for
      * @param string $detail The detail level ('low', 'high', or 'auto')
-     * @return int The token count for the given photo and detail level
+     * @return int The token count for the given media item and detail level
      */
-    public function calculateImageTokenCost(Photo $photo, string $detail = 'auto'): int
+    public function calculateImageTokenCost(Photo|GenericMediaItem $photo, string $detail = 'auto'): int
     {
         /** @var GenericMediaItemContent $mediaItemContent */
         if (!isset($photo->mediaItemContent)) {
@@ -542,18 +597,175 @@ class AIModel extends Entity
     }
 
     /**
-     * Calculates and returns esstimated costs for given in and output token count
-     * @param int $promptTokens
-     * @param int $outputTokens
-     * @return MoneyAmount|null
+     * Calculates and returns estimated costs for given in and output token count.
+     *
+     * Supports optional cached-token discounts, per-web-search-call flat fees,
+     * tiered pricing (above/below the inputTierThresholdTokens threshold), and
+     * per-request variant fees (e.g. search context size for Perplexity Sonar).
+     *
+     * When $cachedInputTokens > 0 and the model has a cached rate configured,
+     * the input cost is split: cached tokens at the reduced rate, remaining at full rate.
+     * The $webSearchCallCount fee is added on top when the model has a web search fee.
+     *
+     * @param int $promptTokens Total prompt tokens (including any cached portion)
+     * @param int $outputTokens Completion tokens
+     * @param string|null $pricingVariant Optional pricing variant key (e.g. 'search_context_size.medium')
+     * @param int $cachedInputTokens Tokens served from prompt cache (default 0)
+     * @param int $webSearchCallCount Number of web_search_call tool invocations (default 0)
+     * @return MoneyAmount|null Estimated cost, or null when rates are not configured
      */
-    public function getEstimatedCostsForTokens(int $promptTokens, int $outputTokens): ?MoneyAmount
-    {
-        if (!($this?->settings->costsPer1000KInputTokens ?? null) || !($this?->settings->costsPer1000KOutputTokens ?? null)) {
+    public function getEstimatedCostsForTokens(
+        int $promptTokens,
+        int $outputTokens,
+        ?string $pricingVariant = null,
+        int $cachedInputTokens = 0,
+        int $webSearchCallCount = 0,
+    ): ?MoneyAmount {
+        $amount = $this->calculateEstimatedCostAmount(
+            $promptTokens,
+            $outputTokens,
+            $pricingVariant,
+            $cachedInputTokens,
+            $webSearchCallCount,
+        );
+        if ($amount === null) {
             return null;
         }
-        $totalCosts = $promptTokens / 1000 * $this->settings->costsPer1000KInputTokens->amount + $outputTokens / 1000 * $this->settings->costsPer1000KOutputTokens->amount;
-        return new MoneyAmount($totalCosts, 'USD');
+        return new MoneyAmount($amount, 'USD');
+    }
+
+    /**
+     * Returns the estimated cost in USD as a plain float, without constructing a MoneyAmount.
+     *
+     * Useful for unit tests that cannot instantiate MoneyAmount via its constructor
+     * (DDD container not available). All calculation logic lives here; the public
+     * getEstimatedCostsForTokens() wraps this in a MoneyAmount.
+     *
+     * @param int $promptTokens Total prompt tokens (including any cached portion)
+     * @param int $outputTokens Completion tokens
+     * @param string|null $pricingVariant Optional pricing variant key
+     * @param int $cachedInputTokens Tokens served from prompt cache (default 0)
+     * @param int $webSearchCallCount Number of web_search_call tool invocations (default 0)
+     * @return float|null Estimated cost in USD, or null when rates are not configured
+     */
+    public function calculateEstimatedCostAmount(
+        int $promptTokens,
+        int $outputTokens,
+        ?string $pricingVariant = null,
+        int $cachedInputTokens = 0,
+        int $webSearchCallCount = 0,
+    ): ?float {
+        $settings = $this->settings;
+
+        // Image-only settings have no token rates; nothing to estimate token-wise.
+        if (!($settings instanceof AILanguageModelSetting)) {
+            return null;
+        }
+
+        $hasTierInput = isset(
+            $settings->inputTierThresholdTokens,
+            $settings->costsPer1000KInputTokens,
+            $settings->costsPer1000InputTokensAboveThreshold,
+        );
+        $hasTierOutput = isset(
+            $settings->inputTierThresholdTokens,
+            $settings->costsPer1000KOutputTokens,
+            $settings->costsPer1000OutputTokensAboveThreshold,
+        );
+        $hasTiers = $hasTierInput && $hasTierOutput;
+
+        if ($hasTiers) {
+            $isAbove = $promptTokens > $settings->inputTierThresholdTokens;
+
+            $fullInputRate = $isAbove
+                ? $settings->costsPer1000InputTokensAboveThreshold->amount
+                : $settings->costsPer1000KInputTokens->amount;
+
+            $outputRate = $isAbove
+                ? $settings->costsPer1000OutputTokensAboveThreshold->amount
+                : $settings->costsPer1000KOutputTokens->amount;
+
+            $inputCost = $this->calculateInputCost($settings, $promptTokens, $cachedInputTokens, $fullInputRate);
+            $totalCosts = $inputCost + ($outputTokens / 1000) * $outputRate;
+            $totalCosts += $this->getVariantFeeAmount($settings, $pricingVariant);
+            $totalCosts += $this->getWebSearchFeeAmount($settings, $webSearchCallCount);
+            return $totalCosts;
+        }
+
+        if (!($settings->costsPer1000KInputTokens ?? null) || !($settings->costsPer1000KOutputTokens ?? null)) {
+            return null;
+        }
+
+        $fullInputRate = $settings->costsPer1000KInputTokens->amount;
+        $inputCost = $this->calculateInputCost($settings, $promptTokens, $cachedInputTokens, $fullInputRate);
+        $totalCosts = $inputCost + ($outputTokens / 1000) * $settings->costsPer1000KOutputTokens->amount;
+        $totalCosts += $this->getVariantFeeAmount($settings, $pricingVariant);
+        $totalCosts += $this->getWebSearchFeeAmount($settings, $webSearchCallCount);
+        return $totalCosts;
+    }
+
+    /**
+     * Calculates input token cost, applying cached token discount when available.
+     *
+     * @param AILanguageModelSetting $settings Model settings
+     * @param int $promptTokens Total prompt tokens
+     * @param int $cachedInputTokens Tokens served from cache
+     * @param float $fullInputRate Full input rate per 1K tokens
+     * @return float Input cost in USD
+     */
+    private function calculateInputCost(
+        AILanguageModelSetting $settings,
+        int $promptTokens,
+        int $cachedInputTokens,
+        float $fullInputRate,
+    ): float {
+        if (
+            $cachedInputTokens > 0
+            && $settings->costsPer1000KCachedInputTokens !== null
+        ) {
+            $cachedRate = $settings->costsPer1000KCachedInputTokens->amount;
+            // Guard against API returning cachedInputTokens > promptTokens
+            $actualCached = min($cachedInputTokens, $promptTokens);
+            $nonCachedTokens = max(0, $promptTokens - $actualCached);
+            return ($nonCachedTokens / 1000) * $fullInputRate
+                + ($actualCached / 1000) * $cachedRate;
+        }
+        return ($promptTokens / 1000) * $fullInputRate;
+    }
+
+    /**
+     * Returns the flat web search fee for the given call count.
+     *
+     * @param AILanguageModelSetting $settings Model settings
+     * @param int $webSearchCallCount Number of web search calls
+     * @return float Fee in USD (0.0 if not applicable)
+     */
+    private function getWebSearchFeeAmount(
+        AILanguageModelSetting $settings,
+        int $webSearchCallCount,
+    ): float {
+        if (
+            $webSearchCallCount > 0
+            && $settings->costsPerWebSearchCall !== null
+        ) {
+            return $webSearchCallCount * $settings->costsPerWebSearchCall->amount;
+        }
+        return 0.0;
+    }
+
+    /**
+     * Returns the per-request variant fee for the given pricing variant.
+     *
+     * @param AILanguageModelSetting $settings Model settings
+     * @param string|null $pricingVariant Pricing variant key (e.g. 'search_context_size.medium')
+     * @return float Fee in USD (0.0 if no variant set or variant not configured)
+     */
+    private function getVariantFeeAmount(AILanguageModelSetting $settings, ?string $pricingVariant): float
+    {
+        if ($pricingVariant === null) {
+            return 0.0;
+        }
+        return $settings->getRequestFeeForVariant($pricingVariant)?->amount ?? 0.0;
     }
 
     /**

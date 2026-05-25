@@ -19,6 +19,7 @@ return [
             'maxPracticallyUsableInputTokens' => 65536,
             'costsPer1000InputTokensInUSD' => 0.0025,
             'costsPer1000OuputTokensInUSD' => 0.01,
+            'costsPer1000CachedInputTokensInUSD' => 0.00125, // 50% off input rate
         ],
     ],
     AIModel::MODEL_OPENAI_GPT4_O_MINI => [
@@ -36,6 +37,7 @@ return [
             'maxPracticallyUsableInputTokens' => 65536,
             'costsPer1000InputTokensInUSD' => 0.00015,
             'costsPer1000OuputTokensInUSD' => 0.0006,
+            'costsPer1000CachedInputTokensInUSD' => 0.000075, // 50% off input rate
         ],
     ],
 
@@ -55,6 +57,7 @@ return [
             'maxPracticallyUsableInputTokens' => 524288,
             'costsPer1000InputTokensInUSD' => 0.002,
             'costsPer1000OuputTokensInUSD' => 0.008,
+            'costsPer1000CachedInputTokensInUSD' => 0.0005, // 75% off (cached = 25% of input)
         ],
     ],
     AIModel::MODEL_OPENAI_GPT4_1_MINI => [
@@ -72,6 +75,7 @@ return [
             'maxPracticallyUsableInputTokens' => 524288,
             'costsPer1000InputTokensInUSD' => 0.0004,
             'costsPer1000OuputTokensInUSD' => 0.0016,
+            'costsPer1000CachedInputTokensInUSD' => 0.0001, // 75% off
         ],
     ],
     AIModel::MODEL_OPENAI_GPT4_1_NANO => [
@@ -89,6 +93,7 @@ return [
             'maxPracticallyUsableInputTokens' => 524288,
             'costsPer1000InputTokensInUSD' => 0.0001,
             'costsPer1000OuputTokensInUSD' => 0.0004,
+            'costsPer1000CachedInputTokensInUSD' => 0.000025, // 75% off
         ],
     ],
 
@@ -108,6 +113,7 @@ return [
             'maxPracticallyUsableInputTokens' => 136000,
             'costsPer1000InputTokensInUSD' => 0.00125,
             'costsPer1000OuputTokensInUSD' => 0.01,
+            'costsPer1000CachedInputTokensInUSD' => 0.000125, // 90% off (cached = 10% of input)
         ],
     ],
     AIModel::MODEL_OPENAI_GPT5_MINI => [
@@ -125,6 +131,7 @@ return [
             'maxPracticallyUsableInputTokens' => 136000,
             'costsPer1000InputTokensInUSD' => 0.00025,
             'costsPer1000OuputTokensInUSD' => 0.002,
+            'costsPer1000CachedInputTokensInUSD' => 0.000025, // 90% off
         ],
     ],
     AIModel::MODEL_OPENAI_GPT5_NANO => [
@@ -142,6 +149,7 @@ return [
             'maxPracticallyUsableInputTokens' => 136000,
             'costsPer1000InputTokensInUSD' => 0.00005,
             'costsPer1000OuputTokensInUSD' => 0.0004,
+            'costsPer1000CachedInputTokensInUSD' => 0.000005, // 90% off
         ],
     ],
 
@@ -161,6 +169,7 @@ return [
             'maxPracticallyUsableInputTokens' => 200000,
             'costsPer1000InputTokensInUSD' => 0.00175,
             'costsPer1000OuputTokensInUSD' => 0.014,
+            'costsPer1000CachedInputTokensInUSD' => 0.000175, // 90% off
         ],
     ],
     AIModel::MODEL_OPENAI_GPT5_2_PRO => [
@@ -199,6 +208,7 @@ return [
             'maxPracticallyUsableInputTokens' => 200000,
             'costsPer1000InputTokensInUSD' => 0.00175,
             'costsPer1000OuputTokensInUSD' => 0.014,
+            'costsPer1000CachedInputTokensInUSD' => 0.000175, // 90% off
         ],
     ],
 
@@ -220,6 +230,11 @@ return [
             'maxPracticallyUsableInputTokens' => 272000,
             'costsPer1000InputTokensInUSD' => 0.0025,
             'costsPer1000OuputTokensInUSD' => 0.015,
+            'costsPer1000CachedInputTokensInUSD' => 0.00025, // 90% off
+            // Above-threshold (>272K input): 2x input + 1.5x output for the full session
+            'inputTierThresholdTokens' => 272000,
+            'costsPer1000InputTokensInUSDAboveThreshold' => 0.005,
+            'costsPer1000OutputTokensInUSDAboveThreshold' => 0.0225,
         ],
     ],
     AIModel::MODEL_OPENAI_GPT5_4_PRO => [
@@ -237,6 +252,10 @@ return [
             'maxPracticallyUsableInputTokens' => 272000,
             'costsPer1000InputTokensInUSD' => 0.03,
             'costsPer1000OuputTokensInUSD' => 0.18,
+            // Above-threshold (>272K input): 2x input + 1.5x output for the full session
+            'inputTierThresholdTokens' => 272000,
+            'costsPer1000InputTokensInUSDAboveThreshold' => 0.06,
+            'costsPer1000OutputTokensInUSDAboveThreshold' => 0.27,
         ],
     ],
 
@@ -255,6 +274,7 @@ return [
             'maxPracticallyUsableInputTokens' => 136000,
             'costsPer1000InputTokensInUSD' => 0.00075,
             'costsPer1000OuputTokensInUSD' => 0.0045,
+            'costsPer1000CachedInputTokensInUSD' => 0.000075, // 90% off
         ],
     ],
     AIModel::MODEL_OPENAI_GPT5_4_NANO => [
@@ -272,6 +292,7 @@ return [
             'maxPracticallyUsableInputTokens' => 136000,
             'costsPer1000InputTokensInUSD' => 0.0002,
             'costsPer1000OuputTokensInUSD' => 0.00125,
+            'costsPer1000CachedInputTokensInUSD' => 0.00002, // 90% off
         ],
     ],
 
@@ -291,6 +312,7 @@ return [
             'maxPracticallyUsableInputTokens' => 100000,
             'costsPer1000InputTokensInUSD' => 0.002,
             'costsPer1000OuputTokensInUSD' => 0.008,
+            'costsPer1000CachedInputTokensInUSD' => 0.0005, // 75% off
         ],
     ],
     AIModel::MODEL_OPENAI_O3_MINI => [
@@ -308,6 +330,7 @@ return [
             'maxPracticallyUsableInputTokens' => 100000,
             'costsPer1000InputTokensInUSD' => 0.0011,
             'costsPer1000OuputTokensInUSD' => 0.0044,
+            'costsPer1000CachedInputTokensInUSD' => 0.00055, // 50% off
         ],
     ],
     AIModel::MODEL_OPENAI_O3_PRO => [
@@ -340,8 +363,9 @@ return [
             'maxInputTokens' => 200000,
             'maxOutputTokens' => 100000,
             'maxPracticallyUsableInputTokens' => 100000,
-            'costsPer1000InputTokensInUSD' => 0.0006,
-            'costsPer1000OuputTokensInUSD' => 0.0024,
+            'costsPer1000InputTokensInUSD' => 0.0011,
+            'costsPer1000OuputTokensInUSD' => 0.0044,
+            'costsPer1000CachedInputTokensInUSD' => 0.000275, // 75% off (cached = 25% of input)
         ],
     ],
 
@@ -694,6 +718,9 @@ return [
         'vendor' => AIModel::VENDOR_GOOGLE,
         'externalId' => 'gemini-2.5-pro',
         'openRouterExternalId' => 'google/gemini-2.5-pro',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Google Gemini 2.5 Pro — reasoning + vision flagship. 1M context, tiered pricing >200K. Training cutoff: January 2025.',
         'settings' => [
             'maxTokens' => 1048576,
             'maxInputTokens' => 1048576,
@@ -701,6 +728,7 @@ return [
             'maxPracticallyUsableInputTokens' => 65536,
             'costsPer1000InputTokensInUSD' => 0.00125,
             'costsPer1000OuputTokensInUSD' => 0.01,
+            'costsPer1000CachedInputTokensInUSD' => 0.000125, // 90% off
             'inputTierThresholdTokens' => 200000,
             'costsPer1000InputTokensInUSDAboveThreshold' => 0.0025,
             'costsPer1000OutputTokensInUSDAboveThreshold' => 0.015,
@@ -711,6 +739,9 @@ return [
         'vendor' => AIModel::VENDOR_GOOGLE,
         'externalId' => 'gemini-2.5-flash',
         'openRouterExternalId' => 'google/gemini-2.5-flash',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Google Gemini 2.5 Flash — hybrid reasoning with configurable thinkingBudget. 1M context, no tier. Multimodal in, text out. Training cutoff: January 2025.',
         'settings' => [
             'maxTokens' => 1048576,
             'maxInputTokens' => 1048576,
@@ -718,13 +749,19 @@ return [
             'maxPracticallyUsableInputTokens' => 65536,
             'costsPer1000InputTokensInUSD' => 0.0003,
             'costsPer1000OuputTokensInUSD' => 0.0025,
+            'costsPer1000CachedInputTokensInUSD' => 0.00003, // 90% off (text/img/vid; audio cached = 0.0001)
         ],
     ],
+    // NOTE: Google API slug is `gemini-3-pro-preview` (no `.0`).
+    // Status: DISCONTINUED as of 2026-03-26. Google redirects to gemini-3.1-pro-preview.
     AIModel::MODEL_GOOGLE_GEMINI_3_0_PRO_PREVIEW => [
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_GOOGLE,
         'externalId' => 'gemini-3-pro-preview',
         'openRouterExternalId' => 'google/gemini-3-pro-preview',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Google Gemini 3 Pro Preview. DEPRECATED 2026-03-26 — use gemini-3.1-pro-preview. 1M context, tiered pricing >200K. Released 2025-11-18.',
         'settings' => [
             'maxTokens' => 1048576,
             'maxInputTokens' => 1048576,
@@ -732,9 +769,182 @@ return [
             'maxPracticallyUsableInputTokens' => 65536,
             'costsPer1000InputTokensInUSD' => 0.002,
             'costsPer1000OuputTokensInUSD' => 0.012,
+            'costsPer1000CachedInputTokensInUSD' => 0.0002, // 90% off
             'inputTierThresholdTokens' => 200000,
             'costsPer1000InputTokensInUSDAboveThreshold' => 0.004,
             'costsPer1000OutputTokensInUSDAboveThreshold' => 0.018,
+        ],
+    ],
+
+    // ── Legacy OpenAI GPT-4 (kept for backwards compatibility, no caching) ──
+    AIModel::MODEL_OPENAI_GPT4 => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_OPENAI,
+        'externalId' => 'gpt-4',
+        'openRouterExternalId' => 'openai/gpt-4',
+        'isReasoningModel' => false,
+        'hasVisionCapabilities' => false,
+        'description' => 'Legacy GPT-4 (Chat Completions, no vision, no prompt caching). Use only for backwards compatibility with older integrations. Training cutoff: April 2023.',
+        'settings' => [
+            'maxTokens' => 8192,
+            'maxInputTokens' => 4096,
+            'maxOutputTokens' => 8192,
+            'maxPracticallyUsableInputTokens' => 2048,
+            'costsPer1000InputTokensInUSD' => 0.03,
+            'costsPer1000OuputTokensInUSD' => 0.06,
+        ],
+    ],
+
+    // ── GPT-5 Chat Completions variant (official id: gpt-5-chat-latest)
+    AIModel::MODEL_OPENAI_GPT5_CHAT => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_OPENAI,
+        'externalId' => 'gpt-5-chat-latest',
+        'openRouterExternalId' => 'openai/gpt-5-chat',
+        'isReasoningModel' => false,
+        'hasVisionCapabilities' => true,
+        'description' => 'GPT-5 Chat Completions variant (non-Responses-API). 128K context (smaller than gpt-5). Use for general chat workloads where reasoning effort / tool use is not needed.',
+        'settings' => [
+            'maxTokens' => 128000,
+            'maxInputTokens' => 128000,
+            'maxOutputTokens' => 16384,
+            'maxPracticallyUsableInputTokens' => 65536,
+            'costsPer1000InputTokensInUSD' => 0.00125,
+            'costsPer1000OuputTokensInUSD' => 0.01,
+            'costsPer1000CachedInputTokensInUSD' => 0.000125, // 90% off
+        ],
+    ],
+
+    // ── GPT-5 Search API (Chat Completions wrapper with native web_search tool)
+    AIModel::MODEL_OPENAI_GPT5_SEARCH_API => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_OPENAI,
+        'externalId' => 'gpt-5-search-api',
+        'openRouterExternalId' => null,
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'GPT-5 with built-in web search. Chat-Completions wrapper around GPT-5 + web_search tool. Returns answers grounded in real-time web results with citations.',
+        'settings' => [
+            'maxTokens' => 400000,
+            'maxInputTokens' => 272000,
+            'maxOutputTokens' => 128000,
+            'maxPracticallyUsableInputTokens' => 136000,
+            'costsPer1000InputTokensInUSD' => 0.00125,
+            'costsPer1000OuputTokensInUSD' => 0.01,
+            'costsPer1000CachedInputTokensInUSD' => 0.000125, // 90% off
+            'costsPerWebSearchCallInUSD' => 0.01, // $10/1K (reasoning-model tier)
+        ],
+    ],
+
+    // ── Gemini 2.5 Flash Image (stable, GA) ────────────────────────────────
+    AIModel::MODEL_GOOGLE_GEMINI_2_5_FLASH_IMAGE => [
+        'type' => AIModel::TYPE_IMAGE,
+        'vendor' => AIModel::VENDOR_GOOGLE,
+        'externalId' => 'gemini-2.5-flash-image',
+        'openRouterExternalId' => 'google/gemini-2.5-flash-image',
+        'description' => 'Gemini 2.5 Flash Image (stable). Image generation + edit. ~1290 output tokens per 1024px image @ $30/1M = $0.039/image. Batch rate 50% off.',
+        'settings' => [
+            'costsPerImageInUSD' => 0.039, // 1024px default; per-token actually $30/1M output × 1290 tokens
+        ],
+    ],
+
+    // ── Gemini 3 Flash Preview (API slug: gemini-3-flash-preview, no `.0`) ─
+    AIModel::MODEL_GOOGLE_GEMINI_3_0_FLASH_PREVIEW => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_GOOGLE,
+        'externalId' => 'gemini-3-flash-preview',
+        'openRouterExternalId' => 'google/gemini-3-flash-preview',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Google Gemini 3 Flash Preview (thinking model). 1M context. Released 2025-12-17.',
+        'settings' => [
+            'maxTokens' => 1048576,
+            'maxInputTokens' => 1048576,
+            'maxOutputTokens' => 65536,
+            'maxPracticallyUsableInputTokens' => 65536,
+            'costsPer1000InputTokensInUSD' => 0.0005,
+            'costsPer1000OuputTokensInUSD' => 0.003,
+        ],
+    ],
+
+    // ── Gemini 3.1 Pro Preview (current flagship of 3.1 series) ────────────
+    AIModel::MODEL_GOOGLE_GEMINI_3_1_PRO_PREVIEW => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_GOOGLE,
+        'externalId' => 'gemini-3.1-pro-preview',
+        'openRouterExternalId' => 'google/gemini-3.1-pro-preview',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Google Gemini 3.1 Pro Preview — current flagship with medium-thinking reasoning level. 1M context, tiered pricing >200K. Released 2026-02-19.',
+        'settings' => [
+            'maxTokens' => 1048576,
+            'maxInputTokens' => 1048576,
+            'maxOutputTokens' => 65536,
+            'maxPracticallyUsableInputTokens' => 65536,
+            'costsPer1000InputTokensInUSD' => 0.002,
+            'costsPer1000OuputTokensInUSD' => 0.012,
+            'costsPer1000CachedInputTokensInUSD' => 0.0002, // 90% off
+            'inputTierThresholdTokens' => 200000,
+            'costsPer1000InputTokensInUSDAboveThreshold' => 0.004,
+            'costsPer1000OutputTokensInUSDAboveThreshold' => 0.018,
+        ],
+    ],
+
+    // ── Gemini 3.1 Flash Image Preview ("Nano Banana 2") ───────────────────
+    // Image cost varies by resolution: 512px=$0.045, 1024px=$0.067, 2048px=$0.101, 4096px=$0.151
+    // Stored as 1024px default. Multi-resolution callers must compute per-resolution.
+    AIModel::MODEL_GOOGLE_GEMINI_3_1_FLASH_IMAGE_PREVIEW => [
+        'type' => AIModel::TYPE_IMAGE,
+        'vendor' => AIModel::VENDOR_GOOGLE,
+        'externalId' => 'gemini-3.1-flash-image-preview',
+        'openRouterExternalId' => 'google/gemini-3.1-flash-image-preview',
+        'description' => 'Gemini 3.1 Flash Image Preview ("Nano Banana 2"). Image gen + edit + multi-turn. Token-priced at $60/1M output. Default 1024px ≈ $0.067/image.',
+        'settings' => [
+            'costsPerImageInUSD' => 0.067, // 1024px default
+        ],
+    ],
+
+    // ── Gemini 3.1 Flash Lite (API slug: gemini-3.1-flash-lite-preview) ────
+    AIModel::MODEL_GOOGLE_GEMINI_3_1_FLASH_LITE => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_GOOGLE,
+        'externalId' => 'gemini-3.1-flash-lite-preview',
+        'openRouterExternalId' => 'google/gemini-3.1-flash-lite-preview',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Google Gemini 3.1 Flash Lite Preview — extended thinking / CoT. Multimodal in, text out. 1M context. Released 2026-03-03.',
+        'settings' => [
+            'maxTokens' => 1048576,
+            'maxInputTokens' => 1048576,
+            'maxOutputTokens' => 65536,
+            'maxPracticallyUsableInputTokens' => 65536,
+            'costsPer1000InputTokensInUSD' => 0.00025, // text/img/vid; audio: 0.0005
+            'costsPer1000OuputTokensInUSD' => 0.0015,
+            'costsPer1000CachedInputTokensInUSD' => 0.000025, // 90% off (text); audio cached: 0.00005
+        ],
+    ],
+
+    // ── Perplexity Sonar (search-grounded model with variant pricing) ──────
+    AIModel::MODEL_PERPLEXITY_SONAR => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_PERPLEXITY,
+        'externalId' => 'sonar',
+        'openRouterExternalId' => 'perplexity/sonar',
+        'isReasoningModel' => false,
+        'hasVisionCapabilities' => false,
+        'description' => 'Perplexity Sonar — web-grounded search model with native citations. 128K context. Search context tier pricing per request.',
+        'settings' => [
+            'maxTokens' => 128000,
+            'maxInputTokens' => 127000,
+            'maxOutputTokens' => 4096,
+            'maxPracticallyUsableInputTokens' => 65536,
+            'costsPer1000InputTokensInUSD' => 0.001,
+            'costsPer1000OuputTokensInUSD' => 0.001,
+            'costsPerRequestInUSDByVariant' => [
+                'search_context_size.low' => 0.005,
+                'search_context_size.medium' => 0.008,
+                'search_context_size.high' => 0.012,
+            ],
         ],
     ],
 ];

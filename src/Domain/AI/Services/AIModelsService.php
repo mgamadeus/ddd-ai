@@ -6,7 +6,10 @@ namespace DDD\Domain\AI\Services;
 
 use DDD\Domain\AI\Entities\Models\AIModel;
 use DDD\Domain\AI\Entities\Models\AIModels;
+use DDD\Domain\AI\Entities\Models\Settings\AIImageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AILanguageModelSetting;
+use DDD\Domain\AI\Entities\Models\Settings\RequestFeeVariant;
+use DDD\Domain\AI\Entities\Models\Settings\RequestFeeVariants;
 use DDD\Domain\Common\Entities\Money\MoneyAmount;
 use DDD\Infrastructure\Exceptions\BadRequestException;
 use DDD\Infrastructure\Exceptions\InternalErrorException;
@@ -77,6 +80,41 @@ class AIModelsService extends Service
             if (isset($settings['costsPer1000OutputTokensInUSDAboveThreshold'])) {
                 $aiModelSetting->costsPer1000OutputTokensAboveThreshold = new MoneyAmount(
                     (float)$settings['costsPer1000OutputTokensInUSDAboveThreshold'], 'USD'
+                );
+            }
+
+            if (isset($settings['costsPer1000CachedInputTokensInUSD'])) {
+                $aiModelSetting->costsPer1000KCachedInputTokens = new MoneyAmount(
+                    (float)$settings['costsPer1000CachedInputTokensInUSD'], 'USD'
+                );
+            }
+
+            if (isset($settings['costsPerWebSearchCallInUSD'])) {
+                $aiModelSetting->costsPerWebSearchCall = new MoneyAmount(
+                    (float)$settings['costsPerWebSearchCallInUSD'], 'USD'
+                );
+            }
+
+            $costsPerRequestInUSDByVariant = $settings['costsPerRequestInUSDByVariant'] ?? null;
+            if (is_array($costsPerRequestInUSDByVariant) && $costsPerRequestInUSDByVariant !== []) {
+                $aiModelSetting->costsPerRequestVariants = new RequestFeeVariants();
+                foreach ($costsPerRequestInUSDByVariant as $variant => $amount) {
+                    $feeVariant = new RequestFeeVariant(
+                        (string)$variant,
+                        new MoneyAmount((float)$amount, 'USD')
+                    );
+                    $aiModelSetting->costsPerRequestVariants->add($feeVariant);
+                }
+            }
+
+            $aiModel->settings = $aiModelSetting;
+        } elseif ($aiModel->type === AIModel::TYPE_IMAGE) {
+            $settings = $modelConfig['settings'] ?? [];
+            $aiModelSetting = new AIImageModelSetting();
+
+            if (isset($settings['costsPerImageInUSD'])) {
+                $aiModelSetting->costsPerImageInUSD = new MoneyAmount(
+                    (float)$settings['costsPerImageInUSD'], 'USD'
                 );
             }
 
