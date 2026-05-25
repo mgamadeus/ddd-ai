@@ -335,10 +335,10 @@ trait ArgusAILanguageModelTrait
         if ($aiModel->vendor === AIModel::VENDOR_GOOGLE && !$isOpenRouterEndpoint) {
             // System instruction (optional)
             $systemPrompt = method_exists($this, 'getSystemPrompt') ? $this->getSystemPrompt() : null;
-            $systemInstruction = $systemPrompt ? $systemPrompt->getPromtTextWithParametersApplied() : '';
+            $systemInstruction = $systemPrompt ? $systemPrompt->getPromptTextWithParametersApplied() : '';
 
             // Task-specific prompt that we always lead with
-            $taskSpecificPrompt = $this->getAIPromptWithParametersAppliedCached()->getPromtTextWithParametersApplied();
+            $taskSpecificPrompt = $this->getAIPromptWithParametersAppliedCached()->getPromptTextWithParametersApplied();
 
             // Build Gemini "parts" with text + inline image data
             $parts = [];
@@ -446,7 +446,7 @@ trait ArgusAILanguageModelTrait
             $messages = [
                 [
                     'role'    => 'system',
-                    'content' => $this->getAIPromptWithParametersAppliedCached()->getPromtTextWithParametersApplied(),
+                    'content' => $this->getAIPromptWithParametersAppliedCached()->getPromptTextWithParametersApplied(),
                 ],
                 ['role' => 'user', 'content' => $this->userContent],
             ];

@@ -16,12 +16,12 @@ class AIPrompt extends Entity
     public string $name;
 
     /** @var string The text of the prompt */
-    public string $promtText;
+    public string $promptText;
 
     protected array $parameters = [];
 
     /** @var string|null Used for storing final prompt text in order to avoid multiple executions of parameter replacements */
-    protected ?string $promtTextWithParametersApplied = null;
+    protected ?string $promptTextWithParametersApplied = null;
 
     /** @var int|null Used for storing final estimated input token count in order to avoid multiple executions of parameter replacements */
     protected ?int $estimatedInputTokens = null;
@@ -36,22 +36,22 @@ class AIPrompt extends Entity
     {
         $this->parameters[$parameterName] = $parameterValue;
         // we reset precalculated value
-        $this->promtTextWithParametersApplied = null;
+        $this->promptTextWithParametersApplied = null;
         $this->estimatedInputTokens = null;
         return $this;
     }
 
-    public function getPromtTextWithParametersApplied(): string
+    public function getPromptTextWithParametersApplied(): string
     {
-        if ($this->promtTextWithParametersApplied) {
-            return $this->promtTextWithParametersApplied;
+        if ($this->promptTextWithParametersApplied) {
+            return $this->promptTextWithParametersApplied;
         }
-        $promtText = $this->promtText;
+        $promptText = $this->promptText;
         foreach ($this->parameters as $parameter => $value) {
-            $promtText = str_replace('{%' . $parameter . '%}', (string)$value, $promtText);
+            $promptText = str_replace('{%' . $parameter . '%}', (string)$value, $promptText);
         }
-        $this->promtTextWithParametersApplied = $promtText;
-        return $promtText;
+        $this->promptTextWithParametersApplied = $promptText;
+        return $promptText;
     }
 
     /**
@@ -62,7 +62,7 @@ class AIPrompt extends Entity
         if ($this->estimatedInputTokens) {
             return $this->estimatedInputTokens;
         }
-        $content = $this->getPromtTextWithParametersApplied();
+        $content = $this->getPromptTextWithParametersApplied();
         $this->estimatedInputTokens = AIPromptsService::getTokenCountForString($content);
         return $this->estimatedInputTokens;
     }

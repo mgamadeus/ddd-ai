@@ -71,9 +71,9 @@ class AIPromptsService extends Service
     public function getAIPromptByName(string $promptName): ?AIPrompt
     {
         $configPath = self::CONFIG_PROMPTS_PREFIX . $promptName;
-        $promtText = Config::get($configPath);
+        $promptText = Config::get($configPath);
 
-        if ($promtText === null || !is_string($promtText)) {
+        if ($promptText === null || !is_string($promptText)) {
             if ($this->throwErrors) {
                 throw new NotFoundException("AIPrompt not found: $promptName");
             }
@@ -84,7 +84,7 @@ class AIPromptsService extends Service
         /** @var AIPrompt $aiPrompt */
         $aiPrompt = new $entityClassName();
         $aiPrompt->name = $promptName;
-        $aiPrompt->promtText = $promtText;
+        $aiPrompt->promptText = $promptText;
 
         return $aiPrompt;
     }

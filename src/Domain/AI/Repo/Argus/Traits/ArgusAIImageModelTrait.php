@@ -84,7 +84,7 @@ trait ArgusAIImageModelTrait
         return [
             'body' => [
                 'model' => $aiModel->externalId,
-                'prompt' => $this->getAIPromptWithParametersApplied()->getPromtTextWithParametersApplied(),
+                'prompt' => $this->getAIPromptWithParametersApplied()->getPromptTextWithParametersApplied(),
             ]
         ];
     }
