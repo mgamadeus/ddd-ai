@@ -713,7 +713,7 @@ class AIModel extends Entity
      * @param float $fullInputRate Full input rate per 1K tokens
      * @return float Input cost in USD
      */
-    private function calculateInputCost(
+    protected function calculateInputCost(
         AILanguageModelSetting $settings,
         int $promptTokens,
         int $cachedInputTokens,
@@ -740,7 +740,7 @@ class AIModel extends Entity
      * @param int $webSearchCallCount Number of web search calls
      * @return float Fee in USD (0.0 if not applicable)
      */
-    private function getWebSearchFeeAmount(
+    protected function getWebSearchFeeAmount(
         AILanguageModelSetting $settings,
         int $webSearchCallCount,
     ): float {
@@ -760,7 +760,7 @@ class AIModel extends Entity
      * @param string|null $pricingVariant Pricing variant key (e.g. 'search_context_size.medium')
      * @return float Fee in USD (0.0 if no variant set or variant not configured)
      */
-    private function getVariantFeeAmount(AILanguageModelSetting $settings, ?string $pricingVariant): float
+    protected function getVariantFeeAmount(AILanguageModelSetting $settings, ?string $pricingVariant): float
     {
         if ($pricingVariant === null) {
             return 0.0;
