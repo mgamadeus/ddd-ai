@@ -4,9 +4,12 @@ declare (strict_types=1);
 
 namespace DDD\Domain\AI\Entities\Models;
 
+use DDD\Domain\AI\Entities\Models\Benchmarks\AIModelBenchmarks;
 use DDD\Domain\AI\Entities\Models\Settings\AIImageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AILanguageModelSetting;
+use DDD\Domain\AI\Entities\Models\Settings\AIModelAgenticUseCaseConfig;
 use DDD\Domain\AI\Entities\Models\Settings\AIModelSetting;
+use DDD\Domain\AI\Entities\Models\Speed\AIModelSpeedMeasurements;
 use DDD\Domain\AI\Entities\Prompts\AIPrompt;
 use DDD\Domain\AI\Services\AIModelsService;
 use DDD\Domain\AI\Services\AIPromptsService;
@@ -63,6 +66,12 @@ class AIModel extends Entity
 
     /** @var string Model Vendor Perplexity */
     public const string VENDOR_PERPLEXITY = 'PERPLEXITY';
+
+    /** @var string Model Vendor Anthropic */
+    public const string VENDOR_ANTHROPIC = 'ANTHROPIC';
+
+    /** @var string Model Vendor xAI (Grok) */
+    public const string VENDOR_XAI = 'XAI';
 
     /**
      * @var string Reasoning effort: none (fastest, minimal thinking)
@@ -181,14 +190,6 @@ class AIModel extends Entity
     public const string MODEL_OPENAI_O3_MINI = 'OPENAI.O3_MINI';
 
     /**
-     * @var string OpenAI o3 Pro Model
-     * @description Premium reasoning model with maximum compute for complex multimodal tasks.
-     * @usage Use for mission-critical tasks requiring top-tier reasoning (e.g., advanced research, complex simulations) and vision processing. High context (200K input).
-     * @notes Training cutoff: April 2025. 300K total context, vision and advanced reasoning enabled. Highest cost in o-series.
-     */
-    public const string MODEL_OPENAI_O3_PRO = 'OPENAI.O3_PRO';
-
-    /**
      * @var string OpenAI o4 Mini Model
      * @description Lightweight reasoning model with multimodal support, optimized for speed and cost.
      * @usage Use for fast, reasoning-based tasks with vision (e.g., quick data analysis, image-based queries) in cost-sensitive applications. High context (200K input).
@@ -211,24 +212,6 @@ class AIModel extends Entity
      * @notes Training cutoff: ~2025. Text-only, Apache 2.0 license. Ultra-low cost via OpenRouter.
      */
     public const string MODEL_OPENAI_GPT_OSS_20B = 'OPENAI.GPT_OSS_20B';
-
-    /**
-     * @var string OpenAI GPT-5.2 Model
-     * @description Newer GPT-5 family iteration for agentic coding + long context.
-     */
-    public const string MODEL_OPENAI_GPT5_2 = 'OPENAI.GPT5_2';
-
-    /**
-     * @var string OpenAI GPT-5.2 Pro Model
-     * @description Highest-accuracy GPT-5.2 variant.
-     */
-    public const string MODEL_OPENAI_GPT5_2_PRO = 'OPENAI.GPT5_2_PRO';
-
-    /**
-     * @var string OpenAI GPT-5.3 Chat Model
-     * @description Conversational GPT-5.3 variant for high-throughput chat workloads.
-     */
-    public const string MODEL_OPENAI_GPT5_3_CHAT = 'OPENAI.GPT5_3_CHAT';
 
     /**
      * @var string OpenAI GPT-5.4 Model
@@ -380,9 +363,6 @@ class AIModel extends Entity
     /** @var string Google Gemini 2.5 Flash */
     public const string MODEL_GOOGLE_GEMINI_2_5_FLASH = 'GOOGLE.GEMINI_2_5_FLASH';
 
-    /** @var string Google Gemini 3.0 Pro Preview */
-    public const string MODEL_GOOGLE_GEMINI_3_0_PRO_PREVIEW = 'GOOGLE.GEMINI_3_0_PRO_PREVIEW';
-
     /** @var string Google Gemini 2.5 Flash Image (non-preview / stable) */
     public const string MODEL_GOOGLE_GEMINI_2_5_FLASH_IMAGE = 'GOOGLE.GEMINI_2_5_FLASH_IMAGE';
 
@@ -399,28 +379,39 @@ class AIModel extends Entity
     public const string MODEL_GOOGLE_GEMINI_3_1_PRO_PREVIEW = 'GOOGLE.GEMINI_3_1_PRO_PREVIEW';
 
     /**
-     * @var string OpenAI GPT-4 legacy Model
-     * @description Legacy GPT-4 (no vision, pre-multimodal). Kept for backwards compatibility with older integrations.
-     */
-    public const string MODEL_OPENAI_GPT4 = 'OPENAI.GPT4';
-
-    /**
      * @var string OpenAI GPT-5 Search API Model
      * @description GPT-5 routed through the Responses API with native `web_search` tool. Use for web-grounded answers with citations.
      */
     public const string MODEL_OPENAI_GPT5_SEARCH_API = 'OPENAI.GPT5_SEARCH_API';
 
     /**
-     * @var string OpenAI GPT-5 Chat Model
-     * @description GPT-5 Chat Completions variant (non-Responses-API). Use for general chat workloads where reasoning effort / tool use is not needed.
-     */
-    public const string MODEL_OPENAI_GPT5_CHAT = 'OPENAI.GPT5_CHAT';
-
-    /**
      * @var string Perplexity Sonar Model
      * @description Perplexity's web-grounded search model with native citations. Returns answers + search results. 128K context.
      */
     public const string MODEL_PERPLEXITY_SONAR = 'PERPLEXITY.SONAR';
+
+    // ===== Anthropic (Claude 4.x) — added 2026-06 =====
+    public const string MODEL_ANTHROPIC_CLAUDE_OPUS_4_8 = 'ANTHROPIC.CLAUDE_OPUS_4_8';
+
+    public const string MODEL_ANTHROPIC_CLAUDE_SONNET_4_6 = 'ANTHROPIC.CLAUDE_SONNET_4_6';
+
+    public const string MODEL_ANTHROPIC_CLAUDE_HAIKU_4_5 = 'ANTHROPIC.CLAUDE_HAIKU_4_5';
+
+    // ===== xAI (Grok) — added 2026-06 =====
+    public const string MODEL_XAI_GROK_4_3 = 'XAI.GROK_4_3';
+
+    public const string MODEL_XAI_GROK_4_20 = 'XAI.GROK_4_20';
+
+    public const string MODEL_XAI_GROK_4_1_FAST = 'XAI.GROK_4_1_FAST';
+
+    // ===== Newer OpenAI / Google — added 2026-06 =====
+    public const string MODEL_OPENAI_GPT5_5 = 'OPENAI.GPT5_5';
+
+    public const string MODEL_OPENAI_GPT5_5_PRO = 'OPENAI.GPT5_5_PRO';
+
+    public const string MODEL_GOOGLE_GEMINI_3_5_FLASH = 'GOOGLE.GEMINI_3_5_FLASH';
+
+    public const string MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE = 'GOOGLE.GEMINI_2_5_FLASH_LITE';
 
     /** @var string The type of the Model */
     #[Choice(callback: [self::class, 'getModelTypes'])]
@@ -451,11 +442,95 @@ class AIModel extends Entity
     public ?bool $hasVisionCapabilities = false;
 
     /**
+     * @var bool If true, the model performs reliable NATIVE function/tool-calling through the OpenAI Chat-Completions
+     *      egress (the agent loop's transport). Defaults true. Set false for models whose tool-call format does NOT
+     *      survive that egress — e.g. gpt-oss (harmony channel markers like `<|channel|>commentary` leak into the
+     *      tool name and every call fails). Used by agentic model selection (ModelManager) to exclude such models
+     *      from the tool-using loop — orthogonal to the capability score.
+     */
+    public bool $supportsNativeToolCalling = true;
+
+    /** @var string Cheapest agentic tier — high-volume / simple tool-use. */
+    public const string AGENT_TIER_CHEAP = 'CHEAP';
+
+    /** @var string Everyday-default agentic tier — fast, reliable tool-calling, balanced cost. */
+    public const string AGENT_TIER_STANDARD = 'STANDARD';
+
+    /** @var string Top agentic tier — hardest multi-step tasks; latency/cost acceptable. */
+    public const string AGENT_TIER_PREMIUM = 'PREMIUM';
+
+    /**
+     * @var string|null Curated agentic tier this model belongs to (an AGENT_TIER_* value), or null = not classified
+     *      for the agent loop (never auto-selected by ModelManager). Manual classification by human judgement — the
+     *      single source of truth for tiered model selection (see ModelManager). Distinct from the capability score:
+     *      a model's tier is a deliberate placement, not a function of its (coverage-skewed) benchmark blend.
+     */
+    public ?string $agentTier = null;
+
+    /**
+     * @var bool Whether the model is eligible for the agent loop AT ALL. Defaults true. Set false to HARD-disqualify
+     *      a model from any agentic use (ModelManager never selects it), based on observed agentic-fit failures that
+     *      are NOT a tool-call-format issue (that is {@see $supportsNativeToolCalling}) — e.g. a model that
+     *      fabricates tool calls / fakes success, or that cannot complete a multi-step tool chain at all. Distinct
+     *      from {@see $agentTier} (which only controls *which* tier): an ineligible model is out regardless of tier.
+     */
+    public bool $agentEligible = true;
+
+    /**
+     * @var AIModelAgenticUseCaseConfig|null Per-model settings for the AGENTIC use case (reasoning effort, temperature),
+     *      applied only when the agentic egress opts in. Rides with the ModelManager's dynamic selection; null = no
+     *      agentic-specific overrides (provider defaults). See {@see AIModelAgenticUseCaseConfig}.
+     */
+    public ?AIModelAgenticUseCaseConfig $agenticUseCase = null;
+
+    /**
      * @var AILanguageModelSetting|AIImageModelSetting The Settings of the Model.
      *      Hydrated as AILanguageModelSetting for TYPE_LANGUAGE / TYPE_AUDIO / TYPE_EMBEDDINGS,
      *      and as AIImageModelSetting for TYPE_IMAGE.
      */
     public AILanguageModelSetting|AIImageModelSetting $settings;
+
+    /**
+     * @var AIModelBenchmarks|null Agentic-capability benchmark evidence (BFCL, τ-bench, GAIA, …), stored parallel
+     *      to {@see $settings}. Null = unrated. Blend via {@see getAgenticIntelligenceScore()}.
+     */
+    public ?AIModelBenchmarks $benchmarks = null;
+
+    /**
+     * The model's blended 0–100 agentic-intelligence score (how good it is at multi-step, tool-using agent work),
+     * derived from its {@see $benchmarks}. Null when the model is unrated. Use to select models by agentic
+     * capability (e.g. cheapest model above a threshold for a task tier) — distinct from raw chat quality and cost.
+     */
+    public function getAgenticIntelligenceScore(): ?int
+    {
+        return $this->benchmarks?->getAgenticIntelligenceScore();
+    }
+
+    /**
+     * @var AIModelSpeedMeasurements|null Output-speed evidence (tokens/sec [+ TTFT]) per measurement source
+     *      (OpenRouter = our routing path / canonical, Artificial Analysis = cross-check), stored parallel to
+     *      {@see $settings} and {@see $benchmarks}. Null = unmeasured. See {@see getTokensPerSecond()} / {@see getSpeedScore()}.
+     */
+    public ?AIModelSpeedMeasurements $speed = null;
+
+    /**
+     * The model's canonical (OpenRouter-preferred) output throughput in tokens/sec, from its {@see $speed}
+     * measurements. Null when the model is unmeasured. The raw absolute speed number.
+     */
+    public function getTokensPerSecond(): ?float
+    {
+        return $this->speed?->getTokensPerSecond();
+    }
+
+    /**
+     * The model's normalised 0–100 speed score derived from its canonical tokens/sec (see
+     * {@see AIModelSpeedMeasurements::getSpeedScore()}). Null when unmeasured. Use alongside
+     * {@see getAgenticIntelligenceScore()} to trade off capability vs latency when selecting a model.
+     */
+    public function getSpeedScore(): ?int
+    {
+        return $this->speed?->getSpeedScore();
+    }
 
     /**
      * Return all model types based on class constants
