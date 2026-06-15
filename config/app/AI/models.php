@@ -1286,4 +1286,83 @@ return [
             'costsPer1000CachedInputTokensInUSD' => 1e-05,
         ],
     ],
+
+    // ── Chinese open-weight agentic candidates (served via Western OpenRouter providers; data-routing must be
+    //    pinned to Western providers before production use). Qwen3-235B + MiniMax M2 promoted to AGENT_TIER_CHEAP
+    //    after the RC ADO agentic eval (2026-06-13). Kimi K2 stays a TEST candidate (no agentTier) — STANDARD
+    //    cost band + profile-write collapse. ──
+    AIModel::MODEL_MINIMAX_M2 => [
+        'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 655.0, 'timeToFirstTokenMs' => 560, 'sourceUrl' => 'https://deepinfra.com/blog/minimax-m2-5-api-benchmarks', 'asOf' => '2026-06'],
+        ],
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TAU_BENCH, 'score' => 76.2, 'sourceUrl' => 'https://artificialanalysis.ai/models/comparisons/qwen3-6-plus-vs-minimax-m2-7', 'asOf' => '2026-06'],
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_BFCL, 'score' => 34.2, 'sourceUrl' => 'https://www.spheron.network/blog/tool-calling-benchmarks-bfcl-tau-bench-latency-optimization/', 'asOf' => '2026-06'],
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_SWE_BENCH_VERIFIED, 'score' => 69.4, 'sourceUrl' => 'https://www.spheron.network/blog/tool-calling-benchmarks-bfcl-tau-bench-latency-optimization/', 'asOf' => '2026-06'],
+        ],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_MINIMAX,
+        'agentTier' => AIModel::AGENT_TIER_CHEAP,
+        'externalId' => 'minimax-m2',
+        'openRouterExternalId' => 'minimax/minimax-m2',
+        'description' => 'MiniMax M2 — agentic MoE (~10B active), strongest tau-bench of the cheap Chinese group, fast + cheap. Chinese model served via Western OpenRouter providers. CHEAP tier — promoted from test candidate after the RC ADO agentic eval (2026-06-13: strongest tau-bench of the cheap group).',
+        'settings' => [
+            'maxTokens' => 204800,
+            'maxInputTokens' => 204800,
+            'maxOutputTokens' => 65536,
+            'maxPracticallyUsableInputTokens' => 131072,
+            'costsPer1000InputTokensInUSD' => 0.00026,
+            'costsPer1000OuputTokensInUSD' => 0.001,
+        ],
+    ],
+    AIModel::MODEL_ALIBABA_QWEN3_235B_INSTRUCT => [
+        'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 120.0, 'timeToFirstTokenMs' => 600, 'sourceUrl' => 'https://openrouter.ai/qwen/qwen3-235b-a22b-2507', 'asOf' => '2026-06'],
+        ],
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_BFCL, 'score' => 60.0, 'sourceUrl' => 'https://gorilla.cs.berkeley.edu/leaderboard.html', 'asOf' => '2026-06', 'official' => false],
+        ],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_ALIBABA,
+        'agentTier' => AIModel::AGENT_TIER_CHEAP,
+        // Instruct (non-thinking) 2507. NOTE: OpenRouter slug has NO "-instruct-" segment — the bare
+        // "...-a22b-2507" IS the instruct build ("...-thinking-2507" is the reasoning sibling). Routes via the
+        // proxy's allowed providers (Google / DeepInfra); Cerebras is NOT in the proxy allowlist.
+        'externalId' => 'qwen3-235b-a22b-2507',
+        'openRouterExternalId' => 'qwen/qwen3-235b-a22b-2507',
+        'description' => 'Qwen3-235B-A22B-Instruct-2507 — multilingual instruct MoE (22B active), cheapest of the group. Chinese model served via Western OpenRouter providers (Google/DeepInfra). CHEAP tier — promoted from test candidate after the RC ADO agentic eval (2026-06-13: cheapest + best reads of the cheap group).',
+        'settings' => [
+            'maxTokens' => 262144,
+            'maxInputTokens' => 262144,
+            'maxOutputTokens' => 65536,
+            'maxPracticallyUsableInputTokens' => 131072,
+            'costsPer1000InputTokensInUSD' => 0.00009,
+            'costsPer1000OuputTokensInUSD' => 0.0001,
+        ],
+    ],
+    AIModel::MODEL_MOONSHOT_KIMI_K2 => [
+        'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 200.0, 'timeToFirstTokenMs' => 450, 'sourceUrl' => 'https://openrouter.ai/moonshotai/kimi-k2-0905', 'asOf' => '2026-06'],
+        ],
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TAU_BENCH, 'score' => 73.9, 'sourceUrl' => 'https://www.spheron.network/blog/tool-calling-benchmarks-bfcl-tau-bench-latency-optimization/', 'asOf' => '2026-06'],
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_BFCL, 'score' => 71.1, 'sourceUrl' => 'https://www.spheron.network/blog/tool-calling-benchmarks-bfcl-tau-bench-latency-optimization/', 'asOf' => '2026-06'],
+        ],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_MOONSHOT,
+        // The bare "moonshotai/kimi-k2" is served ONLY by Novita on OpenRouter, which is NOT in the proxy
+        // allowlist (→ 404 "no allowed providers"). The maintained "-0905" build IS served by Groq (allowed,
+        // fast), so it is the usable Kimi K2 slug here. Cost reflects the Groq endpoint ($1.00/$3.00 per 1M).
+        'externalId' => 'kimi-k2-0905',
+        'openRouterExternalId' => 'moonshotai/kimi-k2-0905',
+        'description' => 'Kimi K2 (0905) — agentic MoE (1T total / 32B active), strong tau-bench + long tool chains (robustness reference). Served via Groq (Western, fast). TEST candidate (no agentTier).',
+        'settings' => [
+            'maxTokens' => 262144,
+            'maxInputTokens' => 262144,
+            'maxOutputTokens' => 65536,
+            'maxPracticallyUsableInputTokens' => 131072,
+            'costsPer1000InputTokensInUSD' => 0.001,
+            'costsPer1000OuputTokensInUSD' => 0.003,
+        ],
+    ],
 ];
