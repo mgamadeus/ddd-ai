@@ -461,7 +461,7 @@ class AIModel extends Entity
      * @var bool If true, the model performs reliable NATIVE function/tool-calling through the OpenAI Chat-Completions
      *      egress (the agent loop's transport). Defaults true. Set false for models whose tool-call format does NOT
      *      survive that egress — e.g. gpt-oss (harmony channel markers like `<|channel|>commentary` leak into the
-     *      tool name and every call fails). Used by agentic model selection (ModelManager) to exclude such models
+     *      tool name and every call fails). Used by agentic model selection (AIModelsService) to exclude such models
      *      from the tool-using loop — orthogonal to the capability score.
      */
     public bool $supportsNativeToolCalling = true;
@@ -477,15 +477,15 @@ class AIModel extends Entity
 
     /**
      * @var string|null Curated agentic tier this model belongs to (an AGENT_TIER_* value), or null = not classified
-     *      for the agent loop (never auto-selected by ModelManager). Manual classification by human judgement — the
-     *      single source of truth for tiered model selection (see ModelManager). Distinct from the capability score:
+     *      for the agent loop (never auto-selected by AIModelsService). Manual classification by human judgement — the
+     *      single source of truth for tiered model selection (see AIModelsService). Distinct from the capability score:
      *      a model's tier is a deliberate placement, not a function of its (coverage-skewed) benchmark blend.
      */
     public ?string $agentTier = null;
 
     /**
      * @var bool Whether the model is eligible for the agent loop AT ALL. Defaults true. Set false to HARD-disqualify
-     *      a model from any agentic use (ModelManager never selects it), based on observed agentic-fit failures that
+     *      a model from any agentic use (AIModelsService never selects it), based on observed agentic-fit failures that
      *      are NOT a tool-call-format issue (that is {@see $supportsNativeToolCalling}) — e.g. a model that
      *      fabricates tool calls / fakes success, or that cannot complete a multi-step tool chain at all. Distinct
      *      from {@see $agentTier} (which only controls *which* tier): an ineligible model is out regardless of tier.
@@ -494,7 +494,7 @@ class AIModel extends Entity
 
     /**
      * @var AIModelAgenticUseCaseConfig|null Per-model settings for the AGENTIC use case (reasoning effort, temperature),
-     *      applied only when the agentic egress opts in. Rides with the ModelManager's dynamic selection; null = no
+     *      applied only when the agentic egress opts in. Rides with the AIModelsService's dynamic selection; null = no
      *      agentic-specific overrides (provider defaults). See {@see AIModelAgenticUseCaseConfig}.
      */
     public ?AIModelAgenticUseCaseConfig $agenticUseCase = null;

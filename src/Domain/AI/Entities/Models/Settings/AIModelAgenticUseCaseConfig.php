@@ -9,7 +9,7 @@ use DDD\Domain\Base\Entities\ValueObject;
 /**
  * Per-model configuration for the AGENTIC use case (tool-calling agent loop), scoped to that use case only — NOT
  * intrinsic model facts (those stay on {@see AILanguageModelSetting}) and NOT a static call-site default. It rides
- * along with whatever model the ModelManager selects, and is applied to the request ONLY when the egress conversation
+ * along with whatever model the AIModelsService selects, and is applied to the request ONLY when the egress conversation
  * opts in (the agentic egress), via {@see \DDD\Domain\AI\Repo\Argus\Traits\ArgusAILanguageModelTrait}. A non-agentic
  * use of the same model keeps the provider defaults.
  *

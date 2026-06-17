@@ -13,9 +13,20 @@ use DDD\Domain\AI\Entities\Models\Settings\AILanguageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AIModelAgenticUseCaseConfig;
 use DDD\Domain\AI\Entities\Models\Settings\RequestFeeVariant;
 use DDD\Domain\AI\Entities\Models\Settings\RequestFeeVariants;
+use DDD\Domain\AI\Entities\Models\Selection\AgentEligibleModel;
+use DDD\Domain\AI\Entities\Models\Selection\AgentEligibleModels;
+use DDD\Domain\AI\Entities\Models\Selection\ModelCandidate;
+use DDD\Domain\AI\Entities\Models\Selection\ModelManagerPolicy;
+use DDD\Domain\AI\Entities\Models\Selection\ModelObjective;
+use DDD\Domain\AI\Entities\Models\Selection\ModelScope;
+use DDD\Domain\AI\Entities\Models\Selection\ModelSelectionContext;
+use DDD\Domain\AI\Entities\Models\Selection\ModelSelectionDecision;
+use DDD\Domain\AI\Entities\Models\Selection\ModelTier;
 use DDD\Domain\AI\Entities\Models\Speed\AIModelSpeedMeasurement;
 use DDD\Domain\AI\Entities\Models\Speed\AIModelSpeedMeasurements;
+use DDD\Domain\AI\Entities\Models\Speed\SpeedPercentiles;
 use DDD\Domain\Common\Entities\Money\MoneyAmount;
+use DDD\DDDBundle;
 use DDD\Infrastructure\Exceptions\BadRequestException;
 use DDD\Infrastructure\Exceptions\InternalErrorException;
 use DDD\Infrastructure\Exceptions\NotFoundException;
@@ -23,7 +34,9 @@ use DDD\Infrastructure\Libs\Config;
 use DDD\Infrastructure\Services\DDDService;
 use DDD\Infrastructure\Services\Service;
 use Psr\Cache\InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use ReflectionException;
+use Throwable;
 
 class AIModelsService extends Service
 {
@@ -47,10 +60,13 @@ class AIModelsService extends Service
         $entiyClassName = DDDService::instance()->getContainerServiceClassNameForClass(AIModel::class);
         /** @var AIModel $aiModel */
         $aiModel = new $entiyClassName();
-        $aiModel->type = $modelConfig['type'];
-        $aiModel->vendor = $modelConfig['vendor'];
+        // Defensive against an incomplete config entry: every required string defaults rather than fataling on a
+        // missing key, so ONE malformed/partial model never breaks the whole catalog load. An entry without a `type`
+        // simply falls through the LANGUAGE/IMAGE branches below (no settings) and is skipped by the candidate loader.
+        $aiModel->type = (string)($modelConfig['type'] ?? '');
+        $aiModel->vendor = (string)($modelConfig['vendor'] ?? '');
         $aiModel->name = $modelKey;
-        $aiModel->externalId = $modelConfig['externalId'];
+        $aiModel->externalId = (string)($modelConfig['externalId'] ?? '');
         $aiModel->openRouterExternalId = $modelConfig['openRouterExternalId'] ?? null;
         $aiModel->description = $modelConfig['description'] ?? null;
         $aiModel->isReasoningModel = (bool)($modelConfig['isReasoningModel'] ?? false);
@@ -60,7 +76,7 @@ class AIModelsService extends Service
         $aiModel->agentEligible = (bool)($modelConfig['agentEligible'] ?? true);
 
         // Per-model AGENTIC-use-case config (reasoning effort, temperature) — applied only by the agentic egress,
-        // riding with the ModelManager's dynamic selection. Absent → null (provider defaults). Scoped to the agent
+        // riding with this service's dynamic model selection. Absent → null (provider defaults). Scoped to the agent
         // loop; does not affect other use cases of the same model.
         $agenticConfig = $modelConfig['agenticUseCase'] ?? null;
         if (is_array($agenticConfig) && $agenticConfig !== []) {
@@ -105,13 +121,31 @@ class AIModelsService extends Service
                 if (!is_array($entry) || !isset($entry['source'])) {
                     continue;
                 }
+                // The OPENROUTER_PROVIDERS source carries the per-provider distribution (top/avg × throughput/latency
+                // percentiles). Its headline tokensPerSecond / timeToFirstTokenMs is the TOP provider's p50 — the
+                // speed-routed expectation — so the canonical speed/score machinery picks the routed value, not a blend.
+                $throughputTop = SpeedPercentiles::fromConfigArray($entry['throughputTop'] ?? null);
+                $latencyTop = SpeedPercentiles::fromConfigArray($entry['latencyTop'] ?? null);
+                $headlineTokensPerSecond = isset($entry['tokensPerSecond'])
+                    ? (float)$entry['tokensPerSecond']
+                    : ($throughputTop?->p50 ?? 0.0);
+                $headlineTimeToFirstTokenMs = isset($entry['timeToFirstTokenMs'])
+                    ? (int)$entry['timeToFirstTokenMs']
+                    : ($latencyTop?->p50 !== null ? (int)round($latencyTop->p50) : null);
                 // Variable first — ObjectSet::add() is by-reference (see the benchmark block above).
                 $measurement = new AIModelSpeedMeasurement(
                     (string)$entry['source'],
-                    (float)($entry['tokensPerSecond'] ?? 0.0),
-                    isset($entry['timeToFirstTokenMs']) ? (int)$entry['timeToFirstTokenMs'] : null,
+                    $headlineTokensPerSecond,
+                    $headlineTimeToFirstTokenMs,
                     isset($entry['sourceUrl']) ? (string)$entry['sourceUrl'] : null,
                     isset($entry['asOf']) ? (string)$entry['asOf'] : null,
+                    isset($entry['providerCount']) ? (int)$entry['providerCount'] : null,
+                    isset($entry['topThroughputProvider']) ? (string)$entry['topThroughputProvider'] : null,
+                    isset($entry['topLatencyProvider']) ? (string)$entry['topLatencyProvider'] : null,
+                    $throughputTop,
+                    SpeedPercentiles::fromConfigArray($entry['throughputAvg'] ?? null),
+                    $latencyTop,
+                    SpeedPercentiles::fromConfigArray($entry['latencyAvg'] ?? null),
                 );
                 $speed->add($measurement);
             }
@@ -212,5 +246,486 @@ class AIModelsService extends Service
         }
 
         return $aiModel;
+    }
+
+    // ==== Model selection (plan 08, Part A) ====================================================================
+    // Picks the model for a {@see ModelManagerPolicy} / {@see ModelScope} from the catalog using the curated
+    // per-model `agentTier` flag, the call's hard constraints (tool-calling, cost ceiling, interactive speed,
+    // context window) and a price/performance/speed Pareto ranking. The pure pipeline ({@see selectCandidate()})
+    // operates on {@see ModelCandidate} projections so it is unit-testable against a fixed snapshot.
+
+    /** @var float Default input weight in the blended cost (agentic workloads are input-heavy). Tunable. */
+    public const float BLENDED_INPUT_WEIGHT = 0.7;
+
+    /** @var float Default output weight in the blended cost. */
+    public const float BLENDED_OUTPUT_WEIGHT = 0.3;
+
+    /**
+     * @var float The "cheap" boundary for the FAST_CHEAP scope (blended $/1M tokens), used INSTEAD of agent-tier
+     *      membership since FAST_CHEAP selects across the whole catalog. Generous enough to admit every genuinely
+     *      cheap fast generator (gpt-oss-120b/20b, the *-nano/-mini families, MiniMax, Qwen — all well under $1),
+     *      while excluding the premium agentic models (GPT-5.x, Opus, Sonnet) whose throughput could otherwise win
+     *      the SPEED ranking at a cost FAST_CHEAP must never pay. Tunable.
+     */
+    public const float FAST_CHEAP_MAX_BLENDED_COST_PER_1M_USD = 2.0;
+
+    protected ?ModelSelectionDecision $lastDecision = null;
+
+    /**
+     * Per-process selection cache: {@see ModelSelectionContext::uniqueKey()} → the resolved {@see ModelSelectionDecision}.
+     * The catalog + scoring are stable within a run, so the same context (scope + policy + constraints) always resolves
+     * to the same model — cache the (expensive) candidate scan/scoring once per distinct context (owner directive).
+     * Static so it is shared across all selections in the process; reset via {@see self::clearSelectionCache()}.
+     *
+     * @var array<string, ModelSelectionDecision>
+     */
+    protected static array $selectionCache = [];
+
+    /**
+     * The model for a {@see ModelScope} (AGENTIC / COMPACTION / MEMORY_MANAGEMENT / FAST_CHEAP) — the central,
+     * scope-aware entry the features call instead of hardcoding a model. Maps the scope to its selection policy and
+     * resolves the eligible model in that band, cached by context.
+     *
+     * @throws BadRequestException when no model is eligible for the scope's tier.
+     */
+    public function getModelForScope(string $scope, ?int $requiredInputTokens = null): ?AIModel
+    {
+        return $this->selectModel($this->buildScopeContext($scope, $requiredInputTokens));
+    }
+
+    /**
+     * The selection context for a scope: each scope's priorities over (quality score, speed, cost) + capability
+     * requirements as a {@see ModelManagerPolicy} band. AGENTIC = CHEAP + interactive + CAPABILITY (the live agent);
+     * COMPACTION / MEMORY_MANAGEMENT = CHEAP + non-interactive + COST (async background); FAST_CHEAP = the non-agentic
+     * latency-critical search/memory rerank (SPEED, no tool-calling, the whole catalog under a cost ceiling).
+     */
+    protected function buildScopeContext(string $scope, ?int $requiredInputTokens): ModelSelectionContext
+    {
+        // [tier, interactive, objective, requiresToolCalling, appliesAgentLoopClassification]. FAST_CHEAP does NOT use
+        // the agent-loop classification — it selects across the WHOLE catalog under a cost ceiling so an
+        // agent-ineligible-but-fast model (gpt-oss-120b @ Cerebras) can win, ranked by raw throughput (plan 28 §5).
+        [$tier, $interactive, $objective, $requiresToolCalling, $appliesAgentLoopClassification] = match ($scope) {
+            ModelScope::AGENTIC => [ModelTier::CHEAP, true, ModelObjective::CAPABILITY, true, true],
+            ModelScope::COMPACTION, ModelScope::MEMORY_MANAGEMENT => [ModelTier::CHEAP, false, ModelObjective::COST, true, true],
+            ModelScope::FAST_CHEAP => [ModelTier::CHEAP, true, ModelObjective::SPEED, false, false],
+            default => [ModelTier::CHEAP, false, ModelObjective::COST, true, true],
+        };
+        // The FAST_CHEAP cost ceiling defines "cheap" when agent-tier membership no longer does (blended $/1M tokens).
+        $maxBlendedCostPer1MUsd = $appliesAgentLoopClassification ? null : self::FAST_CHEAP_MAX_BLENDED_COST_PER_1M_USD;
+        return new ModelSelectionContext(
+            new ModelManagerPolicy(
+                preferredTier: $tier,
+                maxBlendedCostPer1MUsd: $maxBlendedCostPer1MUsd,
+                interactive: $interactive,
+                requiresToolCalling: $requiresToolCalling,
+                appliesAgentLoopClassification: $appliesAgentLoopClassification,
+            ),
+            requiredInputTokens: $requiredInputTokens,
+            scope: $scope,
+            objective: $objective,
+        );
+    }
+
+    /**
+     * Select the model for the given context from the live catalog (by curated agentTier), cached by the context's
+     * {@see ModelSelectionContext::uniqueKey()} — the scan + scoring run ONCE per distinct context per process.
+     *
+     * @throws BadRequestException when no model classified for the (effective) tier is eligible.
+     */
+    public function selectModel(ModelSelectionContext $context): ?AIModel
+    {
+        $cacheKey = $context->uniqueKey();
+        $decision = self::$selectionCache[$cacheKey] ?? null;
+        if ($decision === null) {
+            $decision = $this->selectCandidate($context, $this->loadCandidates());
+            self::$selectionCache[$cacheKey] = $decision;
+        }
+        $this->recordDecision($decision);
+
+        $this->throwErrors = true;
+        return $this->getAIModelByName($decision->modelName);
+    }
+
+    /** Drop the per-process selection cache (e.g. eval/calibration runs that mutate the catalog between selections). */
+    public static function clearSelectionCache(): void
+    {
+        self::$selectionCache = [];
+    }
+
+    /**
+     * The pure selection over the CURATED per-model `agentTier` classification. Keeps the candidates tagged for the
+     * effective tier that are eligible for this call (tool-calling-capable + cost ceiling + interactive speed +
+     * context window), then ranks by price/performance/speed. `preferredVendor` prefers the best-by-objective eligible
+     * of that vendor. Operates on candidate projections only (no catalog/DI) — the unit-test seam.
+     *
+     * @param ModelCandidate[] $candidates
+     * @throws BadRequestException when no model classified for the tier is eligible (sanity guard).
+     */
+    public function selectCandidate(ModelSelectionContext $context, array $candidates): ModelSelectionDecision
+    {
+        $policy = $context->policy;
+        $tier = $this->effectiveTier($policy->preferredTier, $context->minTier);
+
+        $inTier = []; // tagged for this tier (pre-constraint) — for the decision counts
+        $eligible = [];
+        foreach ($candidates as $candidate) {
+            // FAST_CHEAP (appliesAgentLoopClassification=false) selects across the WHOLE catalog under the cost
+            // ceiling, so it skips BOTH the agentTier filter and the agentEligible gate below — that is what lets an
+            // agent-ineligible-but-fast model (gpt-oss-120b) win. Every other scope stays inside its curated tier band.
+            if ($policy->appliesAgentLoopClassification && $candidate->agentTier !== $tier) {
+                continue; // not classified into this tier (the per-model models.php flag is the source of truth)
+            }
+            $inTier[] = $candidate;
+            // Hard eligibility gates: overall agentic fitness (live-test disqualifications — fabricators /
+            // non-chainers) is required for agent-classified scopes; native tool-calling only when the policy demands
+            // it (agentic scopes). A NON-agentic scope (FAST_CHEAP rerank, compaction, memory) sets
+            // requiresToolCalling=false, so a fast non-tool model stays eligible (plan 28 §5).
+            if ($policy->appliesAgentLoopClassification && !$candidate->agentEligible) {
+                continue;
+            }
+            if ($policy->requiresToolCalling && !$candidate->supportsNativeToolCalling) {
+                continue;
+            }
+            if ($policy->maxBlendedCostPer1MUsd !== null
+                && $this->blendedCost($candidate) > $policy->maxBlendedCostPer1MUsd) {
+                continue;
+            }
+            if ($policy->interactive && $context->minSpeedScore !== null
+                && ($candidate->speedScore === null || $candidate->speedScore < $context->minSpeedScore)) {
+                continue;
+            }
+            // Context window is a HARD constraint: usable input window below the required size (or unknown) → skip.
+            if ($context->requiredInputTokens !== null) {
+                $window = $candidate->effectiveInputWindow();
+                if ($window === null || $window < $context->requiredInputTokens) {
+                    continue;
+                }
+            }
+            $eligible[] = $candidate;
+        }
+
+        if ($eligible === []) {
+            throw new BadRequestException(
+                'AIModelsService: no model classified for tier "' . $tier . '" is eligible (agentTier + tool-calling'
+                . ($policy->maxBlendedCostPer1MUsd !== null ? ' + cost ceiling' : '')
+                . ($context->requiredInputTokens !== null ? ' + input window ≥ ' . $context->requiredInputTokens : '')
+                . ')'
+            );
+        }
+
+        // Rank the eligible survivors by PRICE/PERFORMANCE/SPEED: Pareto-prune over (capability↑, speed↑, cost↓) — drop
+        // any model another beats on all three — then order the non-dominated set by the scope's objective. null → COST.
+        $objective = $context->objective ?? ModelObjective::COST;
+        $ranked = $this->optimize($this->paretoFront($eligible), $objective);
+
+        $winner = $ranked[0];
+        $vendorApplied = false;
+        if ($policy->preferredVendor !== null) {
+            foreach ($ranked as $candidate) { // objective-ordered → first vendor match is the best-by-objective of that vendor
+                if ($candidate->vendor === $policy->preferredVendor) {
+                    $winner = $candidate;
+                    $vendorApplied = true;
+                    break;
+                }
+            }
+        }
+
+        return new ModelSelectionDecision(
+            modelName: $winner->name,
+            effectiveTier: $tier,
+            agenticScore: $winner->agenticScore,
+            blendedCostPer1MUsd: $this->blendedCost($winner),
+            vendor: $winner->vendor,
+            vendorPreferenceApplied: $vendorApplied,
+            candidateCount: count($eligible),
+            inTierCount: count($inTier),
+            objective: $objective,
+            reason: 'tier=' . $tier . ' obj=' . $objective . ' paretoRanked(' . count($eligible) . '/' . count($inTier) . ' eligible)'
+                . ($context->requiredInputTokens !== null ? ' ctx≥' . $context->requiredInputTokens : '')
+                . ($policy->preferredVendor !== null
+                    ? ' vendorPref=' . $policy->preferredVendor . ($vendorApplied ? '(applied)' : '(no-qualifier)')
+                    : ''),
+        );
+    }
+
+    /**
+     * Every AIModel the agent may run on — language models that are agent-eligible, tool-calling capable, and rated —
+     * as lightweight {@see AgentEligibleModel} descriptors (name + tier + scores + blended cost), best-first (highest
+     * agentic score). NOT Pareto-pruned: the admin model picker shows the full agent-suitable set. Source of the admin
+     * console's model dropdown.
+     */
+    public function getAgentEligibleModels(): AgentEligibleModels
+    {
+        $eligible = array_values(array_filter(
+            $this->loadCandidates(),
+            static fn (ModelCandidate $candidate): bool =>
+                $candidate->agentEligible
+                && $candidate->supportsNativeToolCalling
+                && $candidate->agenticScore !== null
+                // Untiered models are NOT curated into a selectable tier → not actually available to run on; exclude them.
+                && $candidate->agentTier !== null
+        ));
+        usort(
+            $eligible,
+            static fn (ModelCandidate $a, ModelCandidate $b): int => ($b->agenticScore ?? 0) <=> ($a->agenticScore ?? 0)
+        );
+
+        $agentEligibleModels = new AgentEligibleModels();
+        foreach ($eligible as $candidate) {
+            $agentEligibleModel = new AgentEligibleModel();
+            $agentEligibleModel->name = $candidate->name;
+            $agentEligibleModel->vendor = $candidate->vendor;
+            $agentEligibleModel->tier = $candidate->agentTier;
+            $agentEligibleModel->agenticScore = $candidate->agenticScore;
+            $agentEligibleModel->speedScore = $candidate->speedScore;
+            $agentEligibleModel->tokensPerSecond = $candidate->tokensPerSecond;
+            $agentEligibleModel->timeToFirstTokenMs = $candidate->timeToFirstTokenMs;
+            $agentEligibleModel->blendedCostPer1MUsd = round($this->blendedCost($candidate), 2);
+            $agentEligibleModels->add($agentEligibleModel);
+        }
+        return $agentEligibleModels;
+    }
+
+    /**
+     * The objective candidate set: language models that are rated, Pareto-non-dominated. Useful for the
+     * fleet-mis-route guard and eval reports.
+     *
+     * @throws BadRequestException
+     */
+    public function getAgenticParetoFrontier(): AIModels
+    {
+        $rated = array_values(array_filter(
+            $this->loadCandidates(),
+            static fn (ModelCandidate $c): bool => $c->agenticScore !== null && $c->supportsNativeToolCalling && $c->agentEligible
+        ));
+        return $this->candidatesToAIModels($this->paretoFront($rated));
+    }
+
+    /**
+     * Filtered + Pareto-pruned + objective-ordered candidate set (best-first) — the §2.1 pipeline minus the policy
+     * wrapper. Used by the calibration harness and the fleet guard.
+     *
+     * @throws BadRequestException
+     */
+    public function selectAgenticModels(int $minScore, ?float $maxCostPer1M, ?int $minSpeedScore, string $objective): AIModels
+    {
+        $qualifying = [];
+        foreach ($this->loadCandidates() as $candidate) {
+            if (!$candidate->supportsNativeToolCalling || !$candidate->agentEligible) {
+                continue;
+            }
+            if ($candidate->agenticScore === null || $candidate->agenticScore < $minScore) {
+                continue;
+            }
+            if ($maxCostPer1M !== null && $this->blendedCost($candidate) > $maxCostPer1M) {
+                continue;
+            }
+            if ($minSpeedScore !== null && ($candidate->speedScore === null || $candidate->speedScore < $minSpeedScore)) {
+                continue;
+            }
+            $qualifying[] = $candidate;
+        }
+        $ordered = $this->optimize($this->paretoFront($qualifying), $objective);
+        return $this->candidatesToAIModels($ordered);
+    }
+
+    public function getLastDecision(): ?ModelSelectionDecision
+    {
+        return $this->lastDecision;
+    }
+
+    /**
+     * Stronger of the policy tier and an optional requested floor (by {@see ModelTier} rank).
+     *
+     * @throws BadRequestException on an unknown tier.
+     */
+    protected function effectiveTier(string $policyTier, ?string $minTier): string
+    {
+        if ($minTier === null || !ModelTier::isValid($minTier)) {
+            return $policyTier;
+        }
+        return ModelTier::rank($minTier) > ModelTier::rank($policyTier) ? $minTier : $policyTier;
+    }
+
+    protected function blendedCost(ModelCandidate $candidate): float
+    {
+        return $candidate->blendedCostPer1MUsd(self::BLENDED_INPUT_WEIGHT, self::BLENDED_OUTPUT_WEIGHT);
+    }
+
+    /**
+     * Pareto frontier over (agenticScore ↑, speedScore ↑, blendedCost ↓). A candidate is dropped if another is at
+     * least as good on all three axes and strictly better on at least one. Null speed treated as worst (0).
+     *
+     * @param ModelCandidate[] $candidates
+     * @return ModelCandidate[]
+     */
+    protected function paretoFront(array $candidates): array
+    {
+        $front = [];
+        foreach ($candidates as $a) {
+            $dominated = false;
+            foreach ($candidates as $b) {
+                if ($a === $b) {
+                    continue;
+                }
+                if ($this->dominates($b, $a)) {
+                    $dominated = true;
+                    break;
+                }
+            }
+            if (!$dominated) {
+                $front[] = $a;
+            }
+        }
+        return $front;
+    }
+
+    /**
+     * True if $a dominates $b: ≥ on capability and speed, ≤ on blended cost, and strictly better on ≥ 1 axis.
+     */
+    protected function dominates(ModelCandidate $a, ModelCandidate $b): bool
+    {
+        $aScore = $a->agenticScore ?? 0;
+        $bScore = $b->agenticScore ?? 0;
+        $aSpeed = $a->speedScore ?? 0;
+        $bSpeed = $b->speedScore ?? 0;
+        $aCost = $this->blendedCost($a);
+        $bCost = $this->blendedCost($b);
+
+        $atLeastAsGood = $aScore >= $bScore && $aSpeed >= $bSpeed && $aCost <= $bCost;
+        if (!$atLeastAsGood) {
+            return false;
+        }
+        return $aScore > $bScore || $aSpeed > $bSpeed || $aCost < $bCost;
+    }
+
+    /**
+     * Order candidates best-first by the objective, with deterministic tie-breaks (always ending on name asc).
+     *
+     * @param ModelCandidate[] $candidates
+     * @return ModelCandidate[]
+     */
+    protected function optimize(array $candidates, string $objective): array
+    {
+        $ordered = $candidates;
+        usort($ordered, function (ModelCandidate $a, ModelCandidate $b) use ($objective): int {
+            $aScore = $a->agenticScore ?? 0;
+            $bScore = $b->agenticScore ?? 0;
+            $aCost = $this->blendedCost($a);
+            $bCost = $this->blendedCost($b);
+            $aVal = $a->valuePerDollar(self::BLENDED_INPUT_WEIGHT, self::BLENDED_OUTPUT_WEIGHT) ?? -INF;
+            $bVal = $b->valuePerDollar(self::BLENDED_INPUT_WEIGHT, self::BLENDED_OUTPUT_WEIGHT) ?? -INF;
+            $aSpeed = $a->speedScore ?? 0;
+            $bSpeed = $b->speedScore ?? 0;
+            // SPEED ranks by RAW tokens/sec, not the 0–100 speedScore: the score caps at 100, so gpt-oss-120b
+            // @Cerebras (≈526 tok/s) and a 300 tok/s model would tie at 100 and lose the real ordering. Raw tps
+            // keeps the routed top-provider distinction the FAST_CHEAP scope depends on.
+            $aTps = $a->tokensPerSecond ?? 0.0;
+            $bTps = $b->tokensPerSecond ?? 0.0;
+
+            $cmp = match ($objective) {
+                ModelObjective::CAPABILITY => ($bScore <=> $aScore) ?: ($aCost <=> $bCost) ?: ($bSpeed <=> $aSpeed),
+                ModelObjective::VALUE => ($bVal <=> $aVal) ?: ($aCost <=> $bCost) ?: ($bScore <=> $aScore),
+                ModelObjective::SPEED => ($bTps <=> $aTps) ?: ($aCost <=> $bCost) ?: ($bScore <=> $aScore),
+                default => ($aCost <=> $bCost) ?: ($bVal <=> $aVal) ?: ($bScore <=> $aScore), // COST
+            };
+            return $cmp ?: strcmp($a->name, $b->name);
+        });
+        return $ordered;
+    }
+
+    /**
+     * Load the language-model catalog as candidate projections.
+     *
+     * @return ModelCandidate[]
+     * @throws BadRequestException
+     */
+    protected function loadCandidates(): array
+    {
+        $candidates = [];
+        foreach ($this->getAIModels()->getElements() as $model) {
+            if ($model->type !== AIModel::TYPE_LANGUAGE) {
+                continue;
+            }
+            $candidates[] = $this->candidateFromModel($model);
+        }
+        return $candidates;
+    }
+
+    protected function candidateFromModel(AIModel $model): ModelCandidate
+    {
+        $inputPer1M = 0.0;
+        $outputPer1M = 0.0;
+        $settings = $model->settings ?? null;
+        if ($settings instanceof AILanguageModelSetting) {
+            // Stored costs are per-1K USD; ×1000 = per-1M.
+            $inputPer1M = ($settings->costsPer1000KInputTokens->amount ?? 0.0) * 1000.0;
+            $outputPer1M = ($settings->costsPer1000KOutputTokens->amount ?? 0.0) * 1000.0;
+        }
+
+        $maxInputTokens = null;
+        $practicalInputTokens = null;
+        if ($settings instanceof AILanguageModelSetting) {
+            $maxInputTokens = $settings->maxInputTokens;
+            $practicalInputTokens = $settings->maxPracticallyUsableInputTokens;
+        }
+
+        return new ModelCandidate(
+            name: $model->name,
+            vendor: $model->vendor ?? null,
+            agenticScore: $model->getAgenticIntelligenceScore(),
+            speedScore: $model->getSpeedScore(),
+            tokensPerSecond: $model->getTokensPerSecond(),
+            inputCostPer1MUsd: $inputPer1M,
+            outputCostPer1MUsd: $outputPer1M,
+            maxInputTokens: $maxInputTokens,
+            maxPracticallyUsableInputTokens: $practicalInputTokens,
+            supportsNativeToolCalling: $model->supportsNativeToolCalling,
+            agentTier: $model->agentTier,
+            agentEligible: $model->agentEligible,
+            timeToFirstTokenMs: $model->speed?->getTimeToFirstTokenMs(),
+        );
+    }
+
+    /**
+     * Build an AIModels set from candidates (preserving order) by resolving each by name.
+     *
+     * @param ModelCandidate[] $candidates
+     */
+    protected function candidatesToAIModels(array $candidates): AIModels
+    {
+        $setClass = DDDService::instance()->getContainerServiceClassNameForClass(AIModels::class);
+        /** @var AIModels $set */
+        $set = new $setClass();
+        $this->throwErrors = true;
+        foreach ($candidates as $candidate) {
+            $model = $this->getAIModelByName($candidate->name);
+            if ($model !== null) {
+                $set->add($model);
+            }
+        }
+        return $set;
+    }
+
+    /**
+     * Best-effort audit: keep the last decision and log it if a PSR logger is reachable.
+     */
+    protected function recordDecision(ModelSelectionDecision $decision): void
+    {
+        $this->lastDecision = $decision;
+        try {
+            $container = DDDBundle::getContainer();
+            foreach ([LoggerInterface::class, 'logger'] as $serviceId) {
+                if ($container->has($serviceId)) {
+                    $logger = $container->get($serviceId);
+                    if ($logger instanceof LoggerInterface) {
+                        $logger->info('AIModelsService selection', $decision->toLogContext());
+                        break;
+                    }
+                }
+            }
+        } catch (Throwable) {
+            // logging is best-effort — never let it break selection.
+        }
     }
 }

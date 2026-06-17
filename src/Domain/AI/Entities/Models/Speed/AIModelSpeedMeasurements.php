@@ -32,6 +32,15 @@ class AIModelSpeedMeasurements extends ObjectSet
     public const string SOURCE_ARTIFICIAL_ANALYSIS = 'ARTIFICIAL_ANALYSIS';
 
     /**
+     * Per-provider distribution parsed from the OpenRouter model-page Providers payload: for every upstream provider
+     * serving the model, the p50/p75/p90/p99 throughput + latency over the 30-minute window, aggregated into TOP
+     * (best provider) and AVG (mean across providers). This is the CANONICAL source when present, because we route
+     * with `provider.sort`/`order` — the speed we actually get is the TOP provider's, not the cross-provider blend
+     * that {@see SOURCE_OPENROUTER} reports. Carries the {@see SpeedPercentiles} bundles on the measurement.
+     */
+    public const string SOURCE_OPENROUTER_PROVIDERS = 'OPENROUTER_PROVIDERS';
+
+    /**
      * @var float Reference output throughput (tokens/sec) that maps to a normalised speed score of 100. Chosen as a
      *      "fast interactive generation" rate on OpenRouter's p50 throughput scale; tokens/sec at or above this map
      *      to 100. Tune this single constant as the fleet's throughput profile shifts — the score is a pure function
@@ -40,21 +49,26 @@ class AIModelSpeedMeasurements extends ObjectSet
     public const float REFERENCE_TOKENS_PER_SECOND_FOR_FULL_SCORE = 150.0;
 
     /**
-     * The canonical measurement for headline speed: {@see SOURCE_OPENROUTER} if present (our routing path), otherwise
-     * the first available measurement. Returns null when the set is empty.
+     * The canonical measurement for headline speed, preferring (in order): {@see SOURCE_OPENROUTER_PROVIDERS} (the
+     * provider-resolved top throughput — what `provider.sort` routing actually reaches), then {@see SOURCE_OPENROUTER}
+     * (the cross-provider blend), then the first available measurement. Returns null when the set is empty.
      */
     public function getCanonicalMeasurement(): ?AIModelSpeedMeasurement
     {
         $first = null;
+        $openRouterBlend = null;
         foreach ($this->getElements() as $measurement) {
             if ($first === null) {
                 $first = $measurement;
             }
-            if ($measurement->source === self::SOURCE_OPENROUTER) {
+            if ($measurement->source === self::SOURCE_OPENROUTER_PROVIDERS) {
                 return $measurement;
             }
+            if ($measurement->source === self::SOURCE_OPENROUTER) {
+                $openRouterBlend = $measurement;
+            }
         }
-        return $first;
+        return $openRouterBlend ?? $first;
     }
 
     /**

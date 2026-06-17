@@ -8,6 +8,7 @@ return [
     // ── GPT-4o family (still widely used, multimodal) ──────────────────────
     AIModel::MODEL_OPENAI_GPT4_O => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 50, 'p75' => 82, 'p90' => 120, 'p99' => 195], 'throughputAvg' => ['p50' => 33.5, 'p75' => 55, 'p90' => 89.5, 'p99' => 184.8], 'latencyTop' => ['p50' => 475, 'p75' => 676, 'p90' => 1163.9, 'p99' => 3398.2], 'latencyAvg' => ['p50' => 759.5, 'p75' => 926.8, 'p90' => 1351, 'p99' => 3532.3], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-4o', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 37.5, 'timeToFirstTokenMs' => 816, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-4o&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 119.0, 'timeToFirstTokenMs' => 830, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-4o', 'asOf' => '2026-06-05'],
         ],
@@ -35,6 +36,7 @@ return [
     ],
     AIModel::MODEL_OPENAI_GPT4_O_MINI => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 39, 'p75' => 58, 'p90' => 75.9, 'p99' => 101], 'throughputAvg' => ['p50' => 31, 'p75' => 56.5, 'p90' => 81, 'p99' => 126], 'latencyTop' => ['p50' => 497, 'p75' => 830.2, 'p90' => 1316, 'p99' => 3550.2], 'latencyAvg' => ['p50' => 632.5, 'p75' => 935.1, 'p90' => 1388, 'p99' => 3357.7], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-4o-mini', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 32.0, 'timeToFirstTokenMs' => 620, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-4o-mini&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 60.0, 'timeToFirstTokenMs' => 1700, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-4o-mini', 'asOf' => '2026-06-05'],
         ],
@@ -62,6 +64,7 @@ return [
     // ── GPT-4.1 family (long context, still relevant) ──────────────────────
     AIModel::MODEL_OPENAI_GPT4_1 => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 43, 'p75' => 79, 'p90' => 109, 'p99' => 168], 'throughputAvg' => ['p50' => 39.8, 'p75' => 74.5, 'p90' => 97.7, 'p99' => 173.1], 'latencyTop' => ['p50' => 616, 'p75' => 847, 'p90' => 1399.9, 'p99' => 5764.3], 'latencyAvg' => ['p50' => 761, 'p75' => 1006, 'p90' => 1459.1, 'p99' => 4791.2], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-4.1', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 53.0, 'timeToFirstTokenMs' => 802, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-4.1-2025-04-14&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 127.7, 'timeToFirstTokenMs' => 930, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-4-1', 'asOf' => '2026-06-05'],
         ],
@@ -92,6 +95,7 @@ return [
         // agent-DISQUALIFIED: FLAKY — chains on some paths but dead-ends 2/2 on the ranking 2-hop (live test 2026-06-05). [Loop-entangled — re-evaluate after fix.]
         'agentEligible' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'Azure', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 49, 'p75' => 73, 'p90' => 93, 'p99' => 118], 'throughputAvg' => ['p50' => 40.5, 'p75' => 63.5, 'p90' => 84.5, 'p99' => 113.5], 'latencyTop' => ['p50' => 694, 'p75' => 858, 'p90' => 1258.9, 'p99' => 4728.4], 'latencyAvg' => ['p50' => 704.5, 'p75' => 907.5, 'p90' => 1483.1, 'p99' => 4494.5], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-4.1-mini', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 41.0, 'timeToFirstTokenMs' => 629, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-4.1-mini-2025-04-14&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 85.1, 'timeToFirstTokenMs' => 710, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-4-1-mini', 'asOf' => '2026-06-05'],
         ],
@@ -121,6 +125,7 @@ return [
         // agent-DISQUALIFIED: never completes a multi-step tool chain — dead-ends after load_skills on every 2-hop task (live test 2026-06-05). [Entangled with the loop empty-turn handling; re-evaluate if that is fixed.]
         'agentEligible' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'Azure', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 124, 'p75' => 170, 'p90' => 198, 'p99' => 245], 'throughputAvg' => ['p50' => 70.5, 'p75' => 97, 'p90' => 126, 'p99' => 191], 'latencyTop' => ['p50' => 464.5, 'p75' => 616.2, 'p90' => 909, 'p99' => 2721.5], 'latencyAvg' => ['p50' => 704.8, 'p75' => 1195.6, 'p90' => 2381.2, 'p99' => 20705.4], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-4.1-nano', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 52.5, 'timeToFirstTokenMs' => 998, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-4.1-nano-2025-04-14&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 111.6, 'timeToFirstTokenMs' => 620, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-4-1-nano', 'asOf' => '2026-06-05'],
         ],
@@ -151,6 +156,7 @@ return [
     AIModel::MODEL_OPENAI_GPT5 => [
         'agentTier' => AIModel::AGENT_TIER_STANDARD,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'Azure', 'throughputTop' => ['p50' => 66, 'p75' => 83, 'p90' => 98, 'p99' => 126], 'throughputAvg' => ['p50' => 53, 'p75' => 67.6, 'p90' => 90.5, 'p99' => 110.5], 'latencyTop' => ['p50' => 750.5, 'p75' => 2540.5, 'p90' => 4263, 'p99' => 16129], 'latencyAvg' => ['p50' => 2629, 'p75' => 5433.9, 'p90' => 9408, 'p99' => 34984.9], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 56.5, 'timeToFirstTokenMs' => 3375, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5-2025-08-07&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 91.9, 'timeToFirstTokenMs' => 95210, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-5', 'asOf' => '2026-06-05'],
         ],
@@ -182,6 +188,7 @@ return [
         // agent-DISQUALIFIED: FLAKY — non-deterministic: dead-ended once, succeeded once via start_thread (live test 2026-06-05). [Loop-entangled — re-evaluate after fix.]
         'agentEligible' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'Azure', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 70, 'p75' => 85, 'p90' => 98, 'p99' => 121], 'throughputAvg' => ['p50' => 67.5, 'p75' => 82, 'p90' => 93.5, 'p99' => 112.5], 'latencyTop' => ['p50' => 985.5, 'p75' => 3253.5, 'p90' => 7117, 'p99' => 22307.7], 'latencyAvg' => ['p50' => 2769.2, 'p75' => 6741.2, 'p90' => 12692.9, 'p99' => 28205.8], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5-mini', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 68.0, 'timeToFirstTokenMs' => 4364, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5-mini-2025-08-07&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 96.5, 'timeToFirstTokenMs' => 118350, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-5-mini', 'asOf' => '2026-06-05'],
         ],
@@ -210,6 +217,7 @@ return [
         // agent-DISQUALIFIED: FLAKY — intermittently dead-ends after load_skills on multi-step (1/2 live test 2026-06-05). No fragile models in the agentic pipeline. [Loop empty-turn-entangled — re-evaluate after that fix.]
         'agentEligible' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 129, 'p75' => 149, 'p90' => 168, 'p99' => 238], 'throughputAvg' => ['p50' => 115.5, 'p75' => 152.5, 'p90' => 174, 'p99' => 222.5], 'latencyTop' => ['p50' => 557.5, 'p75' => 797, 'p90' => 2515.6, 'p99' => 8836], 'latencyAvg' => ['p50' => 1732.8, 'p75' => 7562.2, 'p90' => 17377.3, 'p99' => 34042], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5-nano', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 84.5, 'timeToFirstTokenMs' => 2805, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5-nano-2025-08-07&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 149.7, 'timeToFirstTokenMs' => 103810, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-5-nano', 'asOf' => '2026-06-05'],
         ],
@@ -247,6 +255,7 @@ return [
     AIModel::MODEL_OPENAI_GPT5_4 => [
         'agentTier' => AIModel::AGENT_TIER_PREMIUM,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 67.0, 'p75' => 93.0, 'p90' => 119.0, 'p99' => 194.0], 'throughputAvg' => ['p50' => 67.0, 'p75' => 93.0, 'p90' => 119.0, 'p99' => 194.0], 'latencyTop' => ['p50' => 923.0, 'p75' => 1679.2, 'p90' => 3131.0, 'p99' => 14188.6], 'latencyAvg' => ['p50' => 923.0, 'p75' => 1679.2, 'p90' => 3131.0, 'p99' => 14188.6], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5.4', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 47.0, 'timeToFirstTokenMs' => 2470, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5.4-20260305&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 80.8, 'timeToFirstTokenMs' => 248690, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-5-4', 'asOf' => '2026-06-05'],
         ],
@@ -279,6 +288,7 @@ return [
     ],
     AIModel::MODEL_OPENAI_GPT5_4_PRO => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 2, 'p75' => 3.2, 'p90' => 6.1, 'p99' => 12.7], 'throughputAvg' => ['p50' => 2, 'p75' => 3.2, 'p90' => 6.1, 'p99' => 12.7], 'latencyTop' => ['p50' => 7154.5, 'p75' => 13048.8, 'p90' => 126692.5, 'p99' => 243562.1], 'latencyAvg' => ['p50' => 7154.5, 'p75' => 13048.8, 'p90' => 126692.5, 'p99' => 243562.1], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5.4-pro', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 8.0, 'timeToFirstTokenMs' => 104107, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5.4-pro-20260305&variant=standard', 'asOf' => '2026-06-05'],
         ],
         'type' => AIModel::TYPE_LANGUAGE,
@@ -305,6 +315,7 @@ return [
     AIModel::MODEL_OPENAI_GPT5_4_MINI => [
         'agentTier' => AIModel::AGENT_TIER_STANDARD,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 74, 'p75' => 131, 'p90' => 161, 'p99' => 228.1], 'throughputAvg' => ['p50' => 59, 'p75' => 106, 'p90' => 157, 'p99' => 221.6], 'latencyTop' => ['p50' => 773, 'p75' => 1711, 'p90' => 4008.9, 'p99' => 9772.3], 'latencyAvg' => ['p50' => 814.5, 'p75' => 1412, 'p90' => 2791.4, 'p99' => 7094.7], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5.4-mini', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 53.0, 'timeToFirstTokenMs' => 706, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5.4-mini-20260317&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 158.8, 'timeToFirstTokenMs' => 16290, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-5-4-mini', 'asOf' => '2026-06-05'],
         ],
@@ -334,6 +345,7 @@ return [
         // agent-DISQUALIFIED: FLAKY — type-invalid first tool call + degenerate single-day ranking window (live test 2026-06-05). [Loop-entangled — re-evaluate after fix.]
         'agentEligible' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 2, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 66, 'p75' => 112, 'p90' => 149, 'p99' => 204], 'throughputAvg' => ['p50' => 63, 'p75' => 95.5, 'p90' => 119.5, 'p99' => 156], 'latencyTop' => ['p50' => 492, 'p75' => 651.2, 'p90' => 1284.7, 'p99' => 4082.1], 'latencyAvg' => ['p50' => 692, 'p75' => 1011.6, 'p90' => 1935.2, 'p99' => 6426.2], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5.4-nano', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 48.0, 'timeToFirstTokenMs' => 832, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5.4-nano-20260317&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 152.7, 'timeToFirstTokenMs' => 5100, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-5-4-nano', 'asOf' => '2026-06-05'],
         ],
@@ -361,6 +373,7 @@ return [
     // ── o-series reasoning models ──────────────────────────────────────────
     AIModel::MODEL_OPENAI_O3 => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 63, 'p75' => 97, 'p90' => 139.8, 'p99' => 219.1], 'throughputAvg' => ['p50' => 63, 'p75' => 97, 'p90' => 139.8, 'p99' => 219.1], 'latencyTop' => ['p50' => 2808, 'p75' => 4563, 'p90' => 7489, 'p99' => 28610.4], 'latencyAvg' => ['p50' => 2808, 'p75' => 4563, 'p90' => 7489, 'p99' => 28610.4], 'sourceUrl' => 'https://openrouter.ai/openai/o3', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 82.0, 'timeToFirstTokenMs' => 3151, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/o3-2025-04-16&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 144.5, 'timeToFirstTokenMs' => 6840, 'sourceUrl' => 'https://artificialanalysis.ai/models/o3', 'asOf' => '2026-06-05'],
         ],
@@ -389,6 +402,7 @@ return [
     ],
     AIModel::MODEL_OPENAI_O3_MINI => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 111, 'p75' => 156, 'p90' => 247.7, 'p99' => 340.3], 'throughputAvg' => ['p50' => 111, 'p75' => 156, 'p90' => 247.7, 'p99' => 340.3], 'latencyTop' => ['p50' => 1646.5, 'p75' => 2981.8, 'p90' => 15383.8, 'p99' => 89045], 'latencyAvg' => ['p50' => 1646.5, 'p75' => 2981.8, 'p90' => 15383.8, 'p99' => 89045], 'sourceUrl' => 'https://openrouter.ai/openai/o3-mini', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 179.0, 'timeToFirstTokenMs' => 7571, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/o3-mini-2025-01-31&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 214.9, 'timeToFirstTokenMs' => 6190, 'sourceUrl' => 'https://artificialanalysis.ai/models/o3-mini', 'asOf' => '2026-06-05'],
         ],
@@ -415,6 +429,7 @@ return [
     ],
     AIModel::MODEL_OPENAI_O4_MINI => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 66, 'p75' => 100, 'p90' => 131, 'p99' => 157], 'throughputAvg' => ['p50' => 66, 'p75' => 100, 'p90' => 131, 'p99' => 157], 'latencyTop' => ['p50' => 2086, 'p75' => 3577, 'p90' => 5537.4, 'p99' => 12210.9], 'latencyAvg' => ['p50' => 2086, 'p75' => 3577, 'p90' => 5537.4, 'p99' => 12210.9], 'sourceUrl' => 'https://openrouter.ai/openai/o4-mini', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 79.0, 'timeToFirstTokenMs' => 2282, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/o4-mini-2025-04-16&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 163.2, 'timeToFirstTokenMs' => 30730, 'sourceUrl' => 'https://artificialanalysis.ai/models/o4-mini', 'asOf' => '2026-06-05'],
         ],
@@ -448,6 +463,7 @@ return [
         // native tool-calling fails in the agent loop. Excluded from agentic (ModelManager) selection.
         'supportsNativeToolCalling' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 16, 'topThroughputProvider' => 'Cerebras', 'topLatencyProvider' => 'Groq', 'throughputTop' => ['p50' => 526, 'p75' => 909, 'p90' => 1376, 'p99' => 2624.5], 'throughputAvg' => ['p50' => 166, 'p75' => 247.7, 'p90' => 332.2, 'p99' => 600.9], 'latencyTop' => ['p50' => 164, 'p75' => 320, 'p90' => 566.9, 'p99' => 1856.5], 'latencyAvg' => ['p50' => 659.8, 'p75' => 1073.1, 'p90' => 1973.1, 'p99' => 8291.4], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-oss-120b', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 139.0, 'timeToFirstTokenMs' => 422, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-oss-120b&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 335.5, 'timeToFirstTokenMs' => 850, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-oss-120b', 'asOf' => '2026-06-05'],
         ],
@@ -476,6 +492,7 @@ return [
         // native tool-calling fails in the agent loop. Excluded from agentic (ModelManager) selection.
         'supportsNativeToolCalling' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 15, 'topThroughputProvider' => 'Groq', 'topLatencyProvider' => 'WandB', 'throughputTop' => ['p50' => 300, 'p75' => 553, 'p90' => 910, 'p99' => 2667], 'throughputAvg' => ['p50' => 114.4, 'p75' => 157.6, 'p90' => 206.1, 'p99' => 383.3], 'latencyTop' => ['p50' => 268, 'p75' => 304, 'p90' => 486.8, 'p99' => 3215.4], 'latencyAvg' => ['p50' => 925.4, 'p75' => 1566.9, 'p90' => 2883, 'p99' => 8595.3], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-oss-20b', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 62.0, 'timeToFirstTokenMs' => 608, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-oss-20b&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 239.8, 'timeToFirstTokenMs' => 770, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-oss-20b', 'asOf' => '2026-06-05'],
         ],
@@ -503,6 +520,7 @@ return [
     // ── Meta Llama ─────────────────────────────────────────────────────────
     AIModel::MODEL_META_LLAMA_3_1_8B_INSTRUCT => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 5, 'topThroughputProvider' => 'WandB', 'topLatencyProvider' => 'WandB', 'throughputTop' => ['p50' => 122, 'p75' => 146, 'p90' => 175, 'p99' => 376.1], 'throughputAvg' => ['p50' => 63, 'p75' => 86, 'p90' => 120.4, 'p99' => 238.7], 'latencyTop' => ['p50' => 136, 'p75' => 169, 'p90' => 209, 'p99' => 1171.4], 'latencyAvg' => ['p50' => 355.4, 'p75' => 432.9, 'p90' => 587.3, 'p99' => 1585.3], 'sourceUrl' => 'https://openrouter.ai/meta-llama/llama-3.1-8b-instruct', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 25.5, 'timeToFirstTokenMs' => 349, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=meta-llama/llama-3.1-8b-instruct&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 152.8, 'timeToFirstTokenMs' => 900, 'sourceUrl' => 'https://artificialanalysis.ai/models/llama-3-1-instruct-8b', 'asOf' => '2026-06-05'],
         ],
@@ -817,6 +835,7 @@ return [
     // ── Google Gemini ──────────────────────────────────────────────────────
     AIModel::MODEL_GOOGLE_GEMINI_2_5_PRO => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 88.0, 'p75' => 100.0, 'p90' => 111.9, 'p99' => 132.0], 'throughputAvg' => ['p50' => 88.0, 'p75' => 100.0, 'p90' => 111.9, 'p99' => 132.0], 'latencyTop' => ['p50' => 2153.0, 'p75' => 3072.0, 'p90' => 5615.3, 'p99' => 14329.2], 'latencyAvg' => ['p50' => 2153.0, 'p75' => 3072.0, 'p90' => 5615.3, 'p99' => 14329.2], 'sourceUrl' => 'https://openrouter.ai/google/gemini-2.5-pro', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 88.0, 'timeToFirstTokenMs' => 2634, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-2.5-pro&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 142.2, 'timeToFirstTokenMs' => 22680, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-2-5-pro', 'asOf' => '2026-06-05'],
         ],
@@ -848,6 +867,7 @@ return [
     AIModel::MODEL_GOOGLE_GEMINI_2_5_FLASH => [
         'agentTier' => AIModel::AGENT_TIER_CHEAP,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 90.0, 'p75' => 131.0, 'p90' => 162.0, 'p99' => 224.0], 'throughputAvg' => ['p50' => 90.0, 'p75' => 131.0, 'p90' => 162.0, 'p99' => 224.0], 'latencyTop' => ['p50' => 756.5, 'p75' => 1074.0, 'p90' => 1526.0, 'p99' => 4193.5], 'latencyAvg' => ['p50' => 756.5, 'p75' => 1074.0, 'p90' => 1526.0, 'p99' => 4193.5], 'sourceUrl' => 'https://openrouter.ai/google/gemini-2.5-flash', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 58.0, 'timeToFirstTokenMs' => 728, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-2.5-flash&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 206.3, 'timeToFirstTokenMs' => 650, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-2-5-flash', 'asOf' => '2026-06-05'],
         ],
@@ -918,6 +938,7 @@ return [
     // ── Gemini 3 Flash Preview (API slug: gemini-3-flash-preview, no `.0`) ─
     AIModel::MODEL_GOOGLE_GEMINI_3_0_FLASH_PREVIEW => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 70.0, 'p75' => 109.0, 'p90' => 144.0, 'p99' => 189.1], 'throughputAvg' => ['p50' => 70.0, 'p75' => 109.0, 'p90' => 144.0, 'p99' => 189.1], 'latencyTop' => ['p50' => 1218.5, 'p75' => 1876.2, 'p90' => 2666.9, 'p99' => 6488.5], 'latencyAvg' => ['p50' => 1218.5, 'p75' => 1876.2, 'p90' => 2666.9, 'p99' => 6488.5], 'sourceUrl' => 'https://openrouter.ai/google/gemini-3-flash-preview', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 67.5, 'timeToFirstTokenMs' => 1201, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-3-flash-preview-20251217&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 179.9, 'timeToFirstTokenMs' => 7590, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-3-flash-reasoning', 'asOf' => '2026-06-05'],
         ],
@@ -946,6 +967,7 @@ return [
     AIModel::MODEL_GOOGLE_GEMINI_3_1_PRO_PREVIEW => [
         'agentTier' => AIModel::AGENT_TIER_PREMIUM,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 75.0, 'p75' => 96.0, 'p90' => 111.0, 'p99' => 141.0], 'throughputAvg' => ['p50' => 75.0, 'p75' => 96.0, 'p90' => 111.0, 'p99' => 141.0], 'latencyTop' => ['p50' => 5233.0, 'p75' => 6601.0, 'p90' => 8618.9, 'p99' => 24104.1], 'latencyAvg' => ['p50' => 5233.0, 'p75' => 6601.0, 'p90' => 8618.9, 'p99' => 24104.1], 'sourceUrl' => 'https://openrouter.ai/google/gemini-3.1-pro-preview', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 75.5, 'timeToFirstTokenMs' => 5253, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-3.1-pro-preview-20260219&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 139.7, 'timeToFirstTokenMs' => 41270, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-3-1-pro-preview', 'asOf' => '2026-06-05'],
         ],
@@ -995,6 +1017,7 @@ return [
         // agent-DISQUALIFIED: DANGEROUS: invents a ranking ('Position 1') from an empty `[0]:` getRankings payload (live re-test 2026-06-05) — fabrication, like gemini-2.5-flash-lite. Not loop-fixable.
         'agentEligible' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 87.5, 'p75' => 153.0, 'p90' => 196.0, 'p99' => 296.0], 'throughputAvg' => ['p50' => 87.5, 'p75' => 153.0, 'p90' => 196.0, 'p99' => 296.0], 'latencyTop' => ['p50' => 935.0, 'p75' => 1655.2, 'p90' => 4747.5, 'p99' => 10155.0], 'latencyAvg' => ['p50' => 935.0, 'p75' => 1655.2, 'p90' => 4747.5, 'p99' => 10155.0], 'sourceUrl' => 'https://openrouter.ai/google/gemini-3.1-flash-lite-preview', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 59.0, 'timeToFirstTokenMs' => 817, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-3.1-flash-lite-preview-20260303&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 335.5, 'timeToFirstTokenMs' => 6120, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-3-1-flash-lite-preview', 'asOf' => '2026-06-05'],
         ],
@@ -1021,6 +1044,9 @@ return [
 
     // ── Perplexity Sonar (search-grounded model with variant pricing) ──────
     AIModel::MODEL_PERPLEXITY_SONAR => [
+        'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Perplexity', 'topLatencyProvider' => 'Perplexity', 'throughputTop' => ['p50' => 82, 'p75' => 120, 'p90' => 160, 'p99' => 263.2], 'throughputAvg' => ['p50' => 82, 'p75' => 120, 'p90' => 160, 'p99' => 263.2], 'latencyTop' => ['p50' => 1679, 'p75' => 1985, 'p90' => 2922.2, 'p99' => 6837.3], 'latencyAvg' => ['p50' => 1679, 'p75' => 1985, 'p90' => 2922.2, 'p99' => 6837.3], 'sourceUrl' => 'https://openrouter.ai/perplexity/sonar', 'asOf' => '2026-06-17'],
+        ],
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_PERPLEXITY,
         'externalId' => 'sonar',
@@ -1047,6 +1073,7 @@ return [
     AIModel::MODEL_ANTHROPIC_CLAUDE_OPUS_4_8 => [
         'agentTier' => AIModel::AGENT_TIER_PREMIUM,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 3, 'topThroughputProvider' => 'Amazon Bedrock', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 58, 'p75' => 76, 'p90' => 88, 'p99' => 104], 'throughputAvg' => ['p50' => 57.7, 'p75' => 73, 'p90' => 87.3, 'p99' => 107], 'latencyTop' => ['p50' => 1767, 'p75' => 2838, 'p90' => 4211, 'p99' => 7309], 'latencyAvg' => ['p50' => 2612.5, 'p75' => 4002.8, 'p90' => 5483.6, 'p99' => 11184.4], 'sourceUrl' => 'https://openrouter.ai/anthropic/claude-opus-4.8', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 40.0, 'timeToFirstTokenMs' => 2228, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=anthropic/claude-4.8-opus-20260528&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 59.8, 'timeToFirstTokenMs' => 14890, 'sourceUrl' => 'https://artificialanalysis.ai/models/claude-opus-4-8', 'asOf' => '2026-06-05'],
         ],
@@ -1075,6 +1102,7 @@ return [
     AIModel::MODEL_ANTHROPIC_CLAUDE_SONNET_4_6 => [
         'agentTier' => AIModel::AGENT_TIER_PREMIUM,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 3, 'topThroughputProvider' => 'Amazon Bedrock', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 46, 'p75' => 60, 'p90' => 67, 'p99' => 98], 'throughputAvg' => ['p50' => 42.7, 'p75' => 53.7, 'p90' => 62.7, 'p99' => 93.3], 'latencyTop' => ['p50' => 1193, 'p75' => 1855.5, 'p90' => 2633, 'p99' => 5058.3], 'latencyAvg' => ['p50' => 1343.7, 'p75' => 1858.9, 'p90' => 2611.3, 'p99' => 6322.1], 'sourceUrl' => 'https://openrouter.ai/anthropic/claude-sonnet-4.6', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 37.5, 'timeToFirstTokenMs' => 1691, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=anthropic/claude-4.6-sonnet-20260217&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 43.9, 'timeToFirstTokenMs' => 1630, 'sourceUrl' => 'https://artificialanalysis.ai/models/claude-sonnet-4-6', 'asOf' => '2026-06-05'],
         ],
@@ -1103,6 +1131,7 @@ return [
     AIModel::MODEL_ANTHROPIC_CLAUDE_HAIKU_4_5 => [
         'agentTier' => AIModel::AGENT_TIER_STANDARD,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 3, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Anthropic', 'throughputTop' => ['p50' => 87.5, 'p75' => 101.5, 'p90' => 197.9, 'p99' => 210.1], 'throughputAvg' => ['p50' => 74.8, 'p75' => 93.8, 'p90' => 146.4, 'p99' => 197.2], 'latencyTop' => ['p50' => 720, 'p75' => 1027, 'p90' => 1765.3, 'p99' => 7796.2], 'latencyAvg' => ['p50' => 812.5, 'p75' => 1167.6, 'p90' => 1557.4, 'p99' => 3849.2], 'sourceUrl' => 'https://openrouter.ai/anthropic/claude-haiku-4.5', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 72.5, 'timeToFirstTokenMs' => 779, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=anthropic/claude-4.5-haiku-20251001&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 91.5, 'timeToFirstTokenMs' => 850, 'sourceUrl' => 'https://artificialanalysis.ai/models/claude-4-5-haiku', 'asOf' => '2026-06-05'],
         ],
@@ -1133,6 +1162,7 @@ return [
     ],
     AIModel::MODEL_XAI_GROK_4_3 => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'xAI', 'topLatencyProvider' => 'xAI', 'throughputTop' => ['p50' => 139.0, 'p75' => 163.0, 'p90' => 187.0, 'p99' => 252.0], 'throughputAvg' => ['p50' => 139.0, 'p75' => 163.0, 'p90' => 187.0, 'p99' => 252.0], 'latencyTop' => ['p50' => 612.0, 'p75' => 800.0, 'p90' => 1116.9, 'p99' => 2714.8], 'latencyAvg' => ['p50' => 612.0, 'p75' => 800.0, 'p90' => 1116.9, 'p99' => 2714.8], 'sourceUrl' => 'https://openrouter.ai/x-ai/grok-4.3', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 117.0, 'timeToFirstTokenMs' => 731, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=x-ai/grok-4.3-20260430&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 186.9, 'timeToFirstTokenMs' => 14700, 'sourceUrl' => 'https://artificialanalysis.ai/models/grok-4-3', 'asOf' => '2026-06-05'],
         ],
@@ -1153,6 +1183,7 @@ return [
     ],
     AIModel::MODEL_XAI_GROK_4_20 => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'xAI', 'topLatencyProvider' => 'xAI', 'throughputTop' => ['p50' => 106.0, 'p75' => 124.0, 'p90' => 140.0, 'p99' => 170.0], 'throughputAvg' => ['p50' => 106.0, 'p75' => 124.0, 'p90' => 140.0, 'p99' => 170.0], 'latencyTop' => ['p50' => 569.0, 'p75' => 751.0, 'p90' => 2194.9, 'p99' => 13741.1], 'latencyAvg' => ['p50' => 569.0, 'p75' => 751.0, 'p90' => 2194.9, 'p99' => 13741.1], 'sourceUrl' => 'https://openrouter.ai/x-ai/grok-4.20', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 102.0, 'timeToFirstTokenMs' => 758, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=x-ai/grok-4.20-20260309&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 185.2, 'timeToFirstTokenMs' => 14760, 'sourceUrl' => 'https://artificialanalysis.ai/models/grok-4-20', 'asOf' => '2026-06-05'],
         ],
@@ -1191,6 +1222,7 @@ return [
     AIModel::MODEL_OPENAI_GPT5_5 => [
         'agentTier' => AIModel::AGENT_TIER_PREMIUM,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 40.0, 'p75' => 53.0, 'p90' => 65.0, 'p99' => 99.0], 'throughputAvg' => ['p50' => 40.0, 'p75' => 53.0, 'p90' => 65.0, 'p99' => 99.0], 'latencyTop' => ['p50' => 6691.0, 'p75' => 14967.0, 'p90' => 31563.7, 'p99' => 129277.8], 'latencyAvg' => ['p50' => 6691.0, 'p75' => 14967.0, 'p90' => 31563.7, 'p99' => 129277.8], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5.5', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 41.0, 'timeToFirstTokenMs' => 4256, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5.5-20260423&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 63.9, 'timeToFirstTokenMs' => 93320, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-5-5', 'asOf' => '2026-06-05'],
         ],
@@ -1218,6 +1250,7 @@ return [
     ],
     AIModel::MODEL_OPENAI_GPT5_5_PRO => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'OpenAI', 'topLatencyProvider' => 'OpenAI', 'throughputTop' => ['p50' => 18, 'p75' => 31, 'p90' => 42, 'p99' => 68.1], 'throughputAvg' => ['p50' => 18, 'p75' => 31, 'p90' => 42, 'p99' => 68.1], 'latencyTop' => ['p50' => 45178, 'p75' => 86374.2, 'p90' => 176555.3, 'p99' => 351864.5], 'latencyAvg' => ['p50' => 45178, 'p75' => 86374.2, 'p90' => 176555.3, 'p99' => 351864.5], 'sourceUrl' => 'https://openrouter.ai/openai/gpt-5.5-pro', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 22.0, 'timeToFirstTokenMs' => 6244, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=openai/gpt-5.5-pro-20260423&variant=standard', 'asOf' => '2026-06-05'],
         ],
         'type' => AIModel::TYPE_LANGUAGE,
@@ -1238,6 +1271,7 @@ return [
     ],
     AIModel::MODEL_GOOGLE_GEMINI_3_5_FLASH => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 127.0, 'p75' => 149.0, 'p90' => 177.0, 'p99' => 237.1], 'throughputAvg' => ['p50' => 127.0, 'p75' => 149.0, 'p90' => 177.0, 'p99' => 237.1], 'latencyTop' => ['p50' => 3207.0, 'p75' => 3786.0, 'p90' => 4689.4, 'p99' => 10741.1], 'latencyAvg' => ['p50' => 3207.0, 'p75' => 3786.0, 'p90' => 4689.4, 'p99' => 10741.1], 'sourceUrl' => 'https://openrouter.ai/google/gemini-3.5-flash', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 117.5, 'timeToFirstTokenMs' => 1876, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-3.5-flash-20260519&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 187.0, 'timeToFirstTokenMs' => 35030, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-3-5-flash', 'asOf' => '2026-06-05'],
         ],
@@ -1262,6 +1296,7 @@ return [
         // agent-DISQUALIFIED: DANGEROUS: fabricates tool names / fakes write success / invents rankings (live agentic-fit test 2026-06-05) — a model-honesty failure, not loop-fixable.
         'agentEligible' => false,
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 90.0, 'p75' => 170.0, 'p90' => 252.9, 'p99' => 402.0], 'throughputAvg' => ['p50' => 90.0, 'p75' => 170.0, 'p90' => 252.9, 'p99' => 402.0], 'latencyTop' => ['p50' => 465.0, 'p75' => 788.2, 'p90' => 1379.0, 'p99' => 4988.0], 'latencyAvg' => ['p50' => 465.0, 'p75' => 788.2, 'p90' => 1379.0, 'p99' => 4988.0], 'sourceUrl' => 'https://openrouter.ai/google/gemini-2.5-flash-lite', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 76.0, 'timeToFirstTokenMs' => 576, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-2.5-flash-lite&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 245.3, 'timeToFirstTokenMs' => 450, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-2-5-flash-lite', 'asOf' => '2026-06-05'],
         ],
@@ -1293,6 +1328,7 @@ return [
     //    cost band + profile-write collapse. ──
     AIModel::MODEL_MINIMAX_M2 => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 4, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 106, 'p75' => 147.5, 'p90' => 156.4, 'p99' => 165.5], 'throughputAvg' => ['p50' => 75.8, 'p75' => 97.2, 'p90' => 105.2, 'p99' => 117.4], 'latencyTop' => ['p50' => 623, 'p75' => 1192.5, 'p90' => 1934.6, 'p99' => 5884.7], 'latencyAvg' => ['p50' => 1085, 'p75' => 1395.4, 'p90' => 2069.6, 'p99' => 5119.3], 'sourceUrl' => 'https://openrouter.ai/minimax/minimax-m2', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 655.0, 'timeToFirstTokenMs' => 560, 'sourceUrl' => 'https://deepinfra.com/blog/minimax-m2-5-api-benchmarks', 'asOf' => '2026-06'],
         ],
         'benchmarks' => [
@@ -1317,6 +1353,7 @@ return [
     ],
     AIModel::MODEL_ALIBABA_QWEN3_235B_INSTRUCT => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 10, 'topThroughputProvider' => 'WandB', 'topLatencyProvider' => 'WandB', 'throughputTop' => ['p50' => 74, 'p75' => 86, 'p90' => 95, 'p99' => 117], 'throughputAvg' => ['p50' => 37.4, 'p75' => 49.4, 'p90' => 63.2, 'p99' => 85.9], 'latencyTop' => ['p50' => 279, 'p75' => 353, 'p90' => 605, 'p99' => 11407], 'latencyAvg' => ['p50' => 674.1, 'p75' => 1012.7, 'p90' => 3323.6, 'p99' => 10779.1], 'sourceUrl' => 'https://openrouter.ai/qwen/qwen3-235b-a22b-2507', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 120.0, 'timeToFirstTokenMs' => 600, 'sourceUrl' => 'https://openrouter.ai/qwen/qwen3-235b-a22b-2507', 'asOf' => '2026-06'],
         ],
         'benchmarks' => [
@@ -1342,6 +1379,7 @@ return [
     ],
     AIModel::MODEL_MOONSHOT_KIMI_K2 => [
         'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 3, 'topThroughputProvider' => 'Groq', 'topLatencyProvider' => 'Groq', 'throughputTop' => ['p50' => 106, 'p75' => 197, 'p90' => 274, 'p99' => 627.6], 'throughputAvg' => ['p50' => 40.7, 'p75' => 74, 'p90' => 105.3, 'p99' => 238.2], 'latencyTop' => ['p50' => 227, 'p75' => 362, 'p90' => 552, 'p99' => 1410.9], 'latencyAvg' => ['p50' => 950.3, 'p75' => 1275.3, 'p90' => 1922.7, 'p99' => 11272.8], 'sourceUrl' => 'https://openrouter.ai/moonshotai/kimi-k2-0905', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 200.0, 'timeToFirstTokenMs' => 450, 'sourceUrl' => 'https://openrouter.ai/moonshotai/kimi-k2-0905', 'asOf' => '2026-06'],
         ],
         'benchmarks' => [
