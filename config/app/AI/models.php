@@ -866,6 +866,8 @@ return [
     ],
     AIModel::MODEL_GOOGLE_GEMINI_2_5_FLASH => [
         'agentTier' => AIModel::AGENT_TIER_CHEAP,
+        'contextWindowTokens' => 1_000_000,
+        'effectiveContextTokens' => 128_000, // compaction threshold — Gemini MRCR strong @128k, degrades by 1M (absolute, not window-%)
         'speed' => [
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 90.0, 'p75' => 131.0, 'p90' => 162.0, 'p99' => 224.0], 'throughputAvg' => ['p50' => 90.0, 'p75' => 131.0, 'p90' => 162.0, 'p99' => 224.0], 'latencyTop' => ['p50' => 756.5, 'p75' => 1074.0, 'p90' => 1526.0, 'p99' => 4193.5], 'latencyAvg' => ['p50' => 756.5, 'p75' => 1074.0, 'p90' => 1526.0, 'p99' => 4193.5], 'sourceUrl' => 'https://openrouter.ai/google/gemini-2.5-flash', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 58.0, 'timeToFirstTokenMs' => 728, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-2.5-flash&variant=standard', 'asOf' => '2026-06-05'],
@@ -1352,6 +1354,8 @@ return [
         ],
     ],
     AIModel::MODEL_ALIBABA_QWEN3_235B_INSTRUCT => [
+        'contextWindowTokens' => 262_144,
+        'effectiveContextTokens' => 64_000, // compaction threshold — ~RULER effective band, agentic-conservative (256K class)
         'speed' => [
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 10, 'topThroughputProvider' => 'WandB', 'topLatencyProvider' => 'WandB', 'throughputTop' => ['p50' => 74, 'p75' => 86, 'p90' => 95, 'p99' => 117], 'throughputAvg' => ['p50' => 37.4, 'p75' => 49.4, 'p90' => 63.2, 'p99' => 85.9], 'latencyTop' => ['p50' => 279, 'p75' => 353, 'p90' => 605, 'p99' => 11407], 'latencyAvg' => ['p50' => 674.1, 'p75' => 1012.7, 'p90' => 3323.6, 'p99' => 10779.1], 'sourceUrl' => 'https://openrouter.ai/qwen/qwen3-235b-a22b-2507', 'asOf' => '2026-06-17'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 120.0, 'timeToFirstTokenMs' => 600, 'sourceUrl' => 'https://openrouter.ai/qwen/qwen3-235b-a22b-2507', 'asOf' => '2026-06'],

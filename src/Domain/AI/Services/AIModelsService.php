@@ -74,6 +74,20 @@ class AIModelsService extends Service
         $aiModel->supportsNativeToolCalling = (bool)($modelConfig['supportsNativeToolCalling'] ?? true);
         $aiModel->agentTier = isset($modelConfig['agentTier']) ? (string)$modelConfig['agentTier'] : null;
         $aiModel->agentEligible = (bool)($modelConfig['agentEligible'] ?? true);
+        // Context window: explicit override, else the model's own settings.maxInputTokens / maxTokens (every language
+        // model already carries it) — so EVERY model self-describes its window without a redundant per-entry copy.
+        $settingsConfigForWindow = $modelConfig['settings'] ?? [];
+        $windowFromSettings = isset($settingsConfigForWindow['maxInputTokens'])
+            ? (int)$settingsConfigForWindow['maxInputTokens']
+            : (isset($settingsConfigForWindow['maxTokens']) ? (int)$settingsConfigForWindow['maxTokens'] : null);
+        $aiModel->contextWindowTokens = isset($modelConfig['contextWindowTokens'])
+            ? (int)$modelConfig['contextWindowTokens']
+            : $windowFromSettings;
+        // Compaction threshold: explicit override, else derived from the window class (the reliable-reasoning length),
+        // capped at 80% of the window. So every model has a sane threshold.
+        $aiModel->effectiveContextTokens = isset($modelConfig['effectiveContextTokens'])
+            ? (int)$modelConfig['effectiveContextTokens']
+            : self::defaultEffectiveContextTokensForWindow($aiModel->contextWindowTokens);
 
         // Per-model AGENTIC-use-case config (reasoning effort, temperature) — applied only by the agentic egress,
         // riding with this service's dynamic model selection. Absent → null (provider defaults). Scoped to the agent
@@ -489,6 +503,11 @@ class AIModelsService extends Service
             $agentEligibleModel->tokensPerSecond = $candidate->tokensPerSecond;
             $agentEligibleModel->timeToFirstTokenMs = $candidate->timeToFirstTokenMs;
             $agentEligibleModel->blendedCostPer1MUsd = round($this->blendedCost($candidate), 2);
+            // The context window + compaction threshold are DISPLAY/config facts, not selection axes — read them
+            // straight from the AIModel (config-hydrated, cheap), NOT from the pure ModelCandidate projection.
+            $aiModel = $this->getAIModelByName($candidate->name);
+            $agentEligibleModel->contextWindowTokens = $aiModel?->contextWindowTokens ?? $candidate->maxInputTokens;
+            $agentEligibleModel->effectiveContextTokens = $aiModel?->effectiveContextTokens;
             $agentEligibleModels->add($agentEligibleModel);
         }
         return $agentEligibleModels;
@@ -735,5 +754,28 @@ class AIModelsService extends Service
         } catch (Throwable) {
             // logging is best-effort — never let it break selection.
         }
+    }
+
+    /**
+     * The default compaction threshold (`effectiveContextTokens`) for a model whose catalog entry does not set one
+     * explicitly — derived from its context-window class. The reliable-reasoning length is an ABSOLUTE token count, not
+     * a fraction of the window (accuracy degrades with raw token count — RULER / Chroma Context-Rot / Gemini MRCR).
+     * The per-class values: 128K→64k, 200K→50k, 256–272K→64k, 400K→96k,
+     * 1M→128k; small windows fall back to ~60% of the window. Always capped at 80% of the window (the context-rot wall).
+     */
+    protected static function defaultEffectiveContextTokensForWindow(?int $window): ?int
+    {
+        if ($window === null || $window <= 0) {
+            return null;
+        }
+        $threshold = match (true) {
+            $window >= 1_000_000 => 128_000,
+            $window >= 400_000 => 96_000,
+            $window >= 250_000 => 64_000,
+            $window >= 190_000 => 50_000,
+            $window >= 120_000 => 64_000,
+            default => (int)max(8_000, $window * 0.6),
+        };
+        return (int)min($threshold, (int)($window * 0.8));
     }
 }

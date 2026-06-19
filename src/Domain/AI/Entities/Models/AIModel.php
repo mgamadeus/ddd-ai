@@ -493,6 +493,23 @@ class AIModel extends Entity
     public bool $agentEligible = true;
 
     /**
+     * @var int|null The model's HARD context window in tokens (vendor capability). Null = unknown. Upper bound for the
+     *      compaction threshold (capped at ~80% of this) and for budget math.
+     */
+    public ?int $contextWindowTokens = null;
+
+    /**
+     * @var int|null THE COMPACTION THRESHOLD for this model, in tokens: the working-context size at which compaction
+     *      fires for a conversation on this model. ABSOLUTE — not a fraction of the window (context-rot is absolute, so
+     *      a bigger window does NOT mean compact later). This one value drives the whole compaction tree shape: the
+     *      leaf-segment size, the raw verbatim tail and the summary budget are all DERIVED from it (by the consumer's
+     *      compaction-budget calculation). It is the
+     *      model's reliable-reasoning length (RULER/MRCR/context-rot grounded), well below the hard window. A
+     *      per-conversation `CompactionSettings::$triggerTokens` overrides it; null = the global default applies.
+     */
+    public ?int $effectiveContextTokens = null;
+
+    /**
      * @var AIModelAgenticUseCaseConfig|null Per-model settings for the AGENTIC use case (reasoning effort, temperature),
      *      applied only when the agentic egress opts in. Rides with the AIModelsService's dynamic selection; null = no
      *      agentic-specific overrides (provider defaults). See {@see AIModelAgenticUseCaseConfig}.

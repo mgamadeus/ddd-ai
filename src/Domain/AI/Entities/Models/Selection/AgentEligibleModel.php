@@ -40,6 +40,12 @@ class AgentEligibleModel extends ValueObject
     /** @var float|null Blended $/1M tokens (70% input / 30% output), rounded — for a cost hint in the picker. */
     public ?float $blendedCostPer1MUsd = null;
 
+    /** @var int|null The model's HARD context window in tokens — the admin caps the compaction threshold at ~80% of it. */
+    public ?int $contextWindowTokens = null;
+
+    /** @var int|null The model's compaction threshold in tokens (reliable-reasoning length) — the admin auto-fills the token-threshold input with this when the model is picked. */
+    public ?int $effectiveContextTokens = null;
+
     public function __construct()
     {
         parent::__construct();

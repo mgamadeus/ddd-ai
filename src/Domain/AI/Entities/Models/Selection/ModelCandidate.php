@@ -7,10 +7,15 @@ namespace DDD\Domain\AI\Entities\Models\Selection;
 use DDD\Domain\Base\Entities\ValueObject;
 
 /**
- * A lightweight projection of an AIModel for the selection algorithm — the four decision axes (capability, speed,
- * input/output price) plus identity. A DDD ValueObject so the pure pipeline can be unit-tested against a fixed
- * snapshot of synthetic candidates WITHOUT constructing heavy AIModel entities. {@see \DDD\Domain\AI\Services\AIModelsService}
- * builds these from the live catalog.
+ * A FLAT projection of an AIModel's selection decision-axes — capability, speed, input/output price, window,
+ * tool-calling, tier — plus identity. The point is NOT runtime cost (AIModel is config-hydrated, not a DB entity, and
+ * the live path builds AIModels anyway): it is that AIModel exposes these axes COMPUTED from sub-structures
+ * (`getAgenticIntelligenceScore()` ← `$benchmarks`, `getSpeedScore()` ← `$speed`, cost ← `$settings`), whereas the pure
+ * Pareto / scoring pipeline ({@see \DDD\Domain\AI\Services\AIModelsService::selectCandidate()}) needs the axes as
+ * directly-settable scalars so its unit tests construct synthetic candidates as one-liners
+ * (`new ModelCandidate('X', 'Y', 70, 80, …)`) without reverse-engineering benchmark/speed sub-objects to hit a score.
+ * Carry ONLY selection axes here — display/config-only facts (e.g. effectiveContextTokens) are read from the AIModel
+ * by the consumer, not threaded through this projection.
  *
  * blendedCost / valuePerDollar are derived, not stored — a candidate is pure data.
  */
