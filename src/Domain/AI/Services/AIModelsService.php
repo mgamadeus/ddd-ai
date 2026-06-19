@@ -311,9 +311,10 @@ class AIModelsService extends Service
      * The selection context for a scope: each scope's priorities over (quality score, speed, cost) + capability
      * requirements as a {@see ModelManagerPolicy} band. AGENTIC = CHEAP + interactive + CAPABILITY (the live agent);
      * COMPACTION = CHEAP + non-interactive + COST over the agent-tier band (async background, cost-dominant);
-     * FAST_CHEAP and MEMORY_MANAGEMENT share ONE line = the non-agentic, no-tool-calling SPEED pick over the WHOLE
-     * cheap catalog under the cost ceiling (their best models, e.g. gpt-oss-120b per the plan-27 eval, sit outside the
-     * agent-CHEAP band) — so MEMORY_MANAGEMENT resolves to the same model as FAST_CHEAP by construction.
+     * MEMORY_MANAGEMENT = CHEAP + non-interactive + CAPABILITY over the agent-vetted CHEAP band (async background, but
+     * classification QUALITY-dominant — extract type/scope + reconcile decisions need the smartest cheap model, not raw
+     * throughput); FAST_CHEAP = the non-agentic, no-tool-calling SPEED pick over the WHOLE cheap catalog under the cost
+     * ceiling (its best model, e.g. gpt-oss-120b, sits outside the agent-CHEAP band).
      */
     protected function buildScopeContext(string $scope, ?int $requiredInputTokens): ModelSelectionContext
     {
@@ -323,13 +324,17 @@ class AIModelsService extends Service
         [$tier, $interactive, $objective, $requiresToolCalling, $appliesAgentLoopClassification] = match ($scope) {
             ModelScope::AGENTIC => [ModelTier::CHEAP, true, ModelObjective::CAPABILITY, true, true],
             ModelScope::COMPACTION => [ModelTier::CHEAP, false, ModelObjective::COST, true, true],
-            // MEMORY_MANAGEMENT and FAST_CHEAP share ONE policy line on purpose: both are NON-agentic, no-tool-calling
-            // tasks whose best cheap models live OUTSIDE the hand-vetted agent-CHEAP band, so both select across the
-            // WHOLE cheap catalog (appliesAgentLoopClassification = false) under the cost ceiling, ranked by SPEED. This
-            // makes MEMORY_MANAGEMENT resolve to the SAME model as FAST_CHEAP (gpt-oss-120b — the plan-27 eval winner,
-            // 17/18) BY CONSTRUCTION, and keeps them in lock-step under any future tuning. (The matching egress
-            // throughput strategy is set for both in ArgusAILanguageModelTrait::resolveOpenRouterProviderPreference.)
-            ModelScope::FAST_CHEAP, ModelScope::MEMORY_MANAGEMENT => [ModelTier::CHEAP, true, ModelObjective::SPEED, false, false],
+            // MEMORY_MANAGEMENT selects over the hand-vetted agent-CHEAP band (appliesAgentLoopClassification = true) by
+            // CAPABILITY — the memory curator's extract (type/scope classification) and reconcile (ADD/UPDATE/INVALIDATE/
+            // CONFLICT) decisions are quality-dominant, so it wants the SMARTEST cheap model, not the whole-catalog
+            // throughput pick. This resolves to the same model as AGENTIC (Qwen3-235B — RC eval: better memory extract
+            // type/scope classification than the throughput pick gpt-oss-120b, AND cheaper $0.09 vs $0.20/1M; the op is
+            // async so raw throughput is irrelevant). Non-interactive + no tool-calling required (memory ops are plain
+            // JSON-output language ops). It is therefore NO LONGER lock-stepped with FAST_CHEAP.
+            ModelScope::MEMORY_MANAGEMENT => [ModelTier::CHEAP, false, ModelObjective::CAPABILITY, false, true],
+            // FAST_CHEAP = the non-agentic, no-tool-calling SPEED pick over the WHOLE cheap catalog under the cost
+            // ceiling, ranked by throughput (its best model, gpt-oss-120b @ Cerebras, sits outside the agent-CHEAP band).
+            ModelScope::FAST_CHEAP => [ModelTier::CHEAP, true, ModelObjective::SPEED, false, false],
             default => [ModelTier::CHEAP, false, ModelObjective::COST, true, true],
         };
         // The FAST_CHEAP cost ceiling defines "cheap" when agent-tier membership no longer does (blended $/1M tokens).
