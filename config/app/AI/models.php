@@ -1288,6 +1288,14 @@ return [
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 117.5, 'timeToFirstTokenMs' => 1876, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-3.5-flash-20260519&variant=standard', 'asOf' => '2026-06-05'],
             ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 187.0, 'timeToFirstTokenMs' => 35030, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-3-5-flash', 'asOf' => '2026-06-05'],
         ],
+        // Required for agent-eligibility: getAgentEligibleModels() filters on agenticScore !== null, which is the
+        // weighted mean over the AGENTIC_WEIGHTS benchmarks — at least one datapoint is needed or the model is hidden.
+        // τ-bench 95.3 (≈ Gemini 3.1 Pro's 95.6, and far above Gemini 3.0 Flash's 43.3 — confirms 3.5 Flash fixed the
+        // agentic/parallel-call weakness). SWE-Bench *Pro* 55.1 exists but is NOT the SWE_BENCH_VERIFIED benchmark, so
+        // it is not added here (would mislabel the datapoint).
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TAU_BENCH, 'score' => 95.3, 'sourceUrl' => 'https://benchlm.ai/benchmarks/tau2Bench', 'asOf' => '2026-06'],
+        ],
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_GOOGLE,
         'externalId' => 'gemini-3.5-flash',
