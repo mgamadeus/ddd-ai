@@ -1272,6 +1272,17 @@ return [
         ],
     ],
     AIModel::MODEL_GOOGLE_GEMINI_3_5_FLASH => [
+        // STANDARD tier — the GOOGLE option in STANDARD (the gap: STANDARD had only GPT-5 / GPT-5.4-mini / Claude
+        // Haiku 4.5, no Google). Agentic-optimized Flash with NATIVE parallel function calling (multiple tool_calls per
+        // turn) — unlike Gemini 3.0 Flash, which has the documented thought_signature parallel-call bug and avoids
+        // parallel calls entirely (https://discuss.ai.google.dev/t/why-does-gemini-3-flash-return-sequential-single-tool-calls-instead-of-batching-independent-ones/139771).
+        // Vendor positions 3.5 Flash above Gemini 3.1 Pro on agentic benchmarks (~83.6% MCP Atlas) at ~25% less than
+        // the Pro tier; cost $1.50/$9.00 per 1M sits in the STANDARD band. PENDING our agent-eval (single + judge) +
+        // a --debug run showing real parallel tool_calls/delegates before it is trusted for production selection.
+        'agentTier' => AIModel::AGENT_TIER_STANDARD,
+        // Agentic: low thinking for fast, targeted tool-calls + parallel batching; Gemini 3.x mandates temperature 1.0
+        // (stays null → provider default 1.0), as on 3.1 Pro.
+        'agenticUseCase' => ['reasoningEffort' => 'low'],
         'speed' => [
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 1, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 127.0, 'p75' => 149.0, 'p90' => 177.0, 'p99' => 237.1], 'throughputAvg' => ['p50' => 127.0, 'p75' => 149.0, 'p90' => 177.0, 'p99' => 237.1], 'latencyTop' => ['p50' => 3207.0, 'p75' => 3786.0, 'p90' => 4689.4, 'p99' => 10741.1], 'latencyAvg' => ['p50' => 3207.0, 'p75' => 3786.0, 'p90' => 4689.4, 'p99' => 10741.1], 'sourceUrl' => 'https://openrouter.ai/google/gemini-3.5-flash', 'asOf' => '2026-06-18'],
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 117.5, 'timeToFirstTokenMs' => 1876, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=google/gemini-3.5-flash-20260519&variant=standard', 'asOf' => '2026-06-05'],
