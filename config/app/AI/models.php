@@ -1390,22 +1390,25 @@ return [
         // proxy's allowed providers (Google / DeepInfra); Cerebras is NOT in the proxy allowlist.
         'externalId' => 'qwen3-235b-a22b-2507',
         'openRouterExternalId' => 'qwen/qwen3-235b-a22b-2507',
-        // PROVIDER PIN — route every Qwen3-235B call to DeepInfra, never Google (Vertex). WHY: this model's tool-calls
-        // intermittently leak as PLAIN TEXT instead of a structured tool_call (the model emits its `{"name":…,
-        // "arguments":{…}}` into `content`, the tool never executes, and on the next turn it CONFABULATES success —
+        // PROVIDER EXCLUDE — block GOOGLE for every Qwen3-235B call; let OpenRouter pick the fastest of the remaining
+        // clean providers (DeepInfra, AtlasCloud, …) via our sort:throughput. WHY: this model's tool-calls
+        // intermittently leak as PLAIN TEXT instead of a structured tool_call on the GOOGLE endpoint (the Google parser
+        // eats the `{"name":…,"arguments` PREFIX and leaves only the args tail, so even the tool NAME is gone and we
+        // cannot recover it client-side; the tool never executes, and on the next turn the model CONFABULATES success —
         // "I updated your profile" when nothing happened). Measured 2026-06-24, N=30 each, "apply description to my
-        // profile" write turn: Google (Vertex) = 9/30 LEAK (30 %), DeepInfra = 0/30 (0 %). It is a provider-side
-        // tool-call PARSER failure on the Google endpoint under our heavy agent prompt shape, not a model defect —
-        // hence a provider pin, not a model swap. Through our LiteLLM proxy ONLY `deepinfra` + `google-vertex` are
-        // reachable (`provider.only`/`ignore` are stripped; `provider.order` IS honored and even overrides the proxy's
-        // tools→Google default), so we pin via `order:['deepinfra']` + `allowFallbacks:false`. allowFallbacks=false is
-        // deliberate: if DeepInfra is ever unreachable we want a loud OpenRouter "No endpoint" error, NOT a silent
-        // fall-back to the 30 %-leak Google endpoint.
+        // profile" write turn: Google (Vertex) = 9/30 LEAK (30 %), DeepInfra = 0/30, AtlasCloud = 0/30. Provider-side
+        // tool-call PARSER failure on Google under our heavy agent prompt shape, not a model defect — hence a provider
+        // filter, not a model swap. We use `ignore:[google-vertex, google-ai-studio]` (NOT an `order` allowlist): the
+        // proxy HONORS `provider.ignore` (verified — it overrides even `order:[google-vertex]`), so excluding Google is
+        // robust AND future-proof (any newly-allow-listed clean provider is auto-eligible; no hardcoded order to
+        // maintain). `provider.only` IS stripped by the proxy — do not use it. Trade-off accepted: the clean providers
+        // do NO prompt caching (only Google cached ~42 % in practice), but DeepInfra's far lower base price
+        // ($0.09/$0.10 per 1M) offsets the lost cache. Reachable Qwen providers are gated by the OpenRouter ACCOUNT
+        // allow-list (NOT LiteLLM).
         'providerFilters' => [
-            'order' => ['deepinfra'],
-            'allowFallbacks' => false,
+            'ignore' => ['google-vertex', 'google-ai-studio'],
         ],
-        'description' => 'Qwen3-235B-A22B-Instruct-2507 — multilingual instruct MoE (22B active), cheapest of the group. Chinese model served via Western OpenRouter providers (PINNED to DeepInfra — Google leaks tool-calls 30% of the time, see providerFilters comment). CHEAP tier — promoted from test candidate after the RC ADO agentic eval (2026-06-13: cheapest + best reads of the cheap group).',
+        'description' => 'Qwen3-235B-A22B-Instruct-2507 — multilingual instruct MoE (22B active), cheapest of the group. Chinese model served via Western OpenRouter providers (GOOGLE EXCLUDED via providerFilters — Google leaks tool-calls 30% of the time; routed to DeepInfra/AtlasCloud). CHEAP tier — promoted from test candidate after the RC ADO agentic eval (2026-06-13: cheapest + best reads of the cheap group).',
         'settings' => [
             'maxTokens' => 262144,
             'maxInputTokens' => 262144,
