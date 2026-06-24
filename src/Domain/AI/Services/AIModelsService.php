@@ -11,6 +11,7 @@ use DDD\Domain\AI\Entities\Models\Benchmarks\AIModelBenchmarks;
 use DDD\Domain\AI\Entities\Models\Settings\AIImageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AILanguageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AIModelAgenticUseCaseConfig;
+use DDD\Domain\AI\Entities\Models\Settings\AIModelProviderFilters;
 use DDD\Domain\AI\Entities\Models\Settings\RequestFeeVariant;
 use DDD\Domain\AI\Entities\Models\Settings\RequestFeeVariants;
 use DDD\Domain\AI\Entities\Models\Selection\AgentEligibleModel;
@@ -97,6 +98,18 @@ class AIModelsService extends Service
             $aiModel->agenticUseCase = new AIModelAgenticUseCaseConfig(
                 isset($agenticConfig['reasoningEffort']) ? (string)$agenticConfig['reasoningEffort'] : null,
                 isset($agenticConfig['temperature']) ? (float)$agenticConfig['temperature'] : null,
+            );
+        }
+
+        // Per-model OpenRouter provider-routing filter (order / ignore / allow_fallbacks) — pins a model to a specific
+        // upstream provider when it leaks/misbehaves on another (e.g. Qwen3-235B → DeepInfra). Applied to the provider
+        // block on the OpenRouter/LiteLLM egress. Absent → OpenRouter picks freely. See {@see AIModelProviderFilters}.
+        $providerFiltersConfig = $modelConfig['providerFilters'] ?? null;
+        if (is_array($providerFiltersConfig) && $providerFiltersConfig !== []) {
+            $aiModel->providerFilters = new AIModelProviderFilters(
+                array_values(array_map('strval', (array)($providerFiltersConfig['order'] ?? []))),
+                array_values(array_map('strval', (array)($providerFiltersConfig['ignore'] ?? []))),
+                isset($providerFiltersConfig['allowFallbacks']) ? (bool)$providerFiltersConfig['allowFallbacks'] : null,
             );
         }
 

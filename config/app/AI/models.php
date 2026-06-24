@@ -1390,7 +1390,22 @@ return [
         // proxy's allowed providers (Google / DeepInfra); Cerebras is NOT in the proxy allowlist.
         'externalId' => 'qwen3-235b-a22b-2507',
         'openRouterExternalId' => 'qwen/qwen3-235b-a22b-2507',
-        'description' => 'Qwen3-235B-A22B-Instruct-2507 — multilingual instruct MoE (22B active), cheapest of the group. Chinese model served via Western OpenRouter providers (Google/DeepInfra). CHEAP tier — promoted from test candidate after the RC ADO agentic eval (2026-06-13: cheapest + best reads of the cheap group).',
+        // PROVIDER PIN — route every Qwen3-235B call to DeepInfra, never Google (Vertex). WHY: this model's tool-calls
+        // intermittently leak as PLAIN TEXT instead of a structured tool_call (the model emits its `{"name":…,
+        // "arguments":{…}}` into `content`, the tool never executes, and on the next turn it CONFABULATES success —
+        // "I updated your profile" when nothing happened). Measured 2026-06-24, N=30 each, "apply description to my
+        // profile" write turn: Google (Vertex) = 9/30 LEAK (30 %), DeepInfra = 0/30 (0 %). It is a provider-side
+        // tool-call PARSER failure on the Google endpoint under our heavy agent prompt shape, not a model defect —
+        // hence a provider pin, not a model swap. Through our LiteLLM proxy ONLY `deepinfra` + `google-vertex` are
+        // reachable (`provider.only`/`ignore` are stripped; `provider.order` IS honored and even overrides the proxy's
+        // tools→Google default), so we pin via `order:['deepinfra']` + `allowFallbacks:false`. allowFallbacks=false is
+        // deliberate: if DeepInfra is ever unreachable we want a loud OpenRouter "No endpoint" error, NOT a silent
+        // fall-back to the 30 %-leak Google endpoint.
+        'providerFilters' => [
+            'order' => ['deepinfra'],
+            'allowFallbacks' => false,
+        ],
+        'description' => 'Qwen3-235B-A22B-Instruct-2507 — multilingual instruct MoE (22B active), cheapest of the group. Chinese model served via Western OpenRouter providers (PINNED to DeepInfra — Google leaks tool-calls 30% of the time, see providerFilters comment). CHEAP tier — promoted from test candidate after the RC ADO agentic eval (2026-06-13: cheapest + best reads of the cheap group).',
         'settings' => [
             'maxTokens' => 262144,
             'maxInputTokens' => 262144,

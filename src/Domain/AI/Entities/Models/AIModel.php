@@ -8,6 +8,7 @@ use DDD\Domain\AI\Entities\Models\Benchmarks\AIModelBenchmarks;
 use DDD\Domain\AI\Entities\Models\Settings\AIImageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AILanguageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AIModelAgenticUseCaseConfig;
+use DDD\Domain\AI\Entities\Models\Settings\AIModelProviderFilters;
 use DDD\Domain\AI\Entities\Models\Settings\AIModelSetting;
 use DDD\Domain\AI\Entities\Models\Speed\AIModelSpeedMeasurements;
 use DDD\Domain\AI\Entities\Prompts\AIPrompt;
@@ -515,6 +516,15 @@ class AIModel extends Entity
      *      agentic-specific overrides (provider defaults). See {@see AIModelAgenticUseCaseConfig}.
      */
     public ?AIModelAgenticUseCaseConfig $agenticUseCase = null;
+
+    /**
+     * @var AIModelProviderFilters|null Per-model OpenRouter PROVIDER-ROUTING filter (order / ignore / allow_fallbacks),
+     *      applied to the `provider` block on the OpenRouter / LiteLLM-proxy egress when present — composes with and
+     *      takes precedence over the dynamic sort/require_parameters. Pins a model to a specific upstream provider when
+     *      it leaks/misbehaves on another (canonical case: Qwen3-235B → DeepInfra, never Google). null = OpenRouter
+     *      picks freely. See {@see AIModelProviderFilters}.
+     */
+    public ?AIModelProviderFilters $providerFilters = null;
 
     /**
      * @var AILanguageModelSetting|AIImageModelSetting The Settings of the Model.
