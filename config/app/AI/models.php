@@ -1444,4 +1444,43 @@ return [
             'costsPer1000OuputTokensInUSD' => 0.003,
         ],
     ],
+    AIModel::MODEL_ZAI_GLM_5_2 => [
+        // STANDARD tier — the strongest OPEN-WEIGHT agentic model in the band (and the fastest of it: ~115.9 tok/s
+        // median, TTFT ~1.45s — above the comparable open-weight median ~72.8 tok/s). At $0.95/$3.00 per 1M it sits
+        // well inside the STANDARD cost band while beating GPT-5.5 on several long-horizon coding benchmarks.
+        // PENDING our agent-eval (single + judge) + a --debug run showing real parallel tool_calls/delegates before
+        // it is trusted for production selection.
+        'agentTier' => AIModel::AGENT_TIER_STANDARD,
+        // Agentic: GLM-5.2 exposes only the 'high' and 'xhigh' reasoning efforts (no none/low/medium) — 'xhigh' maps
+        // to max reasoning (slowest). Use 'high' for fast, targeted tool-calls; supports NATIVE parallel tool calls
+        // (`parallel_tool_calls` in supported_parameters).
+        'agenticUseCase' => ['reasoningEffort' => 'high'],
+        'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 115.9, 'timeToFirstTokenMs' => 1450, 'sourceUrl' => 'https://openrouter.ai/z-ai/glm-5.2', 'asOf' => '2026-06'],
+        ],
+        // Required for agent-eligibility: getAgentEligibleModels() filters on agenticScore !== null, the weighted mean
+        // over the AGENTIC_WEIGHTS benchmarks — at least one datapoint is needed or the model is hidden. τ²-bench 99.1
+        // (benchlm.ai, #1 on that leaderboard — SAME source/scale as Gemini 3.5 Flash's 95.3 and GLM-5.1's 97.7).
+        // GLM-5.2's headline published numbers are SWE-bench *Pro* 62.1, Terminal-Bench 2.1 81.0, MCP-Atlas 76.8 —
+        // none is a weighted benchmark constant here, and SWE-bench Pro is NOT SWE_BENCH_VERIFIED (would mislabel the
+        // datapoint), so they live in the description, not as benchmark rows.
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TAU_BENCH, 'score' => 99.1, 'sourceUrl' => 'https://benchlm.ai/benchmarks/tau2Bench', 'asOf' => '2026-06'],
+        ],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_ZAI,
+        'externalId' => 'glm-5.2',
+        'openRouterExternalId' => 'z-ai/glm-5.2',
+        'isReasoningModel' => true,
+        'description' => 'GLM-5.2 (Z.ai) — open-weight agentic MoE, strongest open model for long-horizon coding + tool use (SWE-bench Pro 62.1, Terminal-Bench 2.1 81.0, MCP-Atlas 76.8), ~1M context, text-only, native parallel tool calls, reasoning efforts high/xhigh. Chinese model served via Western OpenRouter providers. STANDARD tier — pending the RC ADO agentic eval (single + judge).',
+        'settings' => [
+            'maxTokens' => 1048576,
+            'maxInputTokens' => 1048576,
+            'maxOutputTokens' => 32768,
+            'maxPracticallyUsableInputTokens' => 524288,
+            'costsPer1000InputTokensInUSD' => 0.00095,
+            'costsPer1000OuputTokensInUSD' => 0.003,
+            'costsPer1000CachedInputTokensInUSD' => 0.00018,
+        ],
+    ],
 ];

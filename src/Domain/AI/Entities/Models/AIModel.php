@@ -83,6 +83,9 @@ class AIModel extends Entity
     /** @var string Model Vendor Alibaba / Qwen (China; served via Western OpenRouter providers) */
     public const string VENDOR_ALIBABA = 'ALIBABA';
 
+    /** @var string Model Vendor Z.ai / Zhipu AI / GLM (China; served via Western OpenRouter providers) */
+    public const string VENDOR_ZAI = 'ZAI';
+
     /**
      * @var string Reasoning effort: none (fastest, minimal thinking)
      * @description Use when you want maximum speed and minimal reasoning.
@@ -429,6 +432,8 @@ class AIModel extends Entity
     public const string MODEL_ALIBABA_QWEN3_235B_INSTRUCT = 'ALIBABA.QWEN3_235B_INSTRUCT';
 
     public const string MODEL_MOONSHOT_KIMI_K2 = 'MOONSHOT.KIMI_K2';
+
+    public const string MODEL_ZAI_GLM_5_2 = 'ZAI.GLM_5_2';
 
     /** @var string The type of the Model */
     #[Choice(callback: [self::class, 'getModelTypes'])]
