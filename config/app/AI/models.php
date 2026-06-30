@@ -1347,29 +1347,34 @@ return [
     //    pinned to Western providers before production use). Qwen3-235B + MiniMax M2 promoted to AGENT_TIER_CHEAP
     //    after the RC ADO agentic eval (2026-06-13). Kimi K2 stays a TEST candidate (no agentTier) — STANDARD
     //    cost band + profile-write collapse. ──
-    AIModel::MODEL_MINIMAX_M2 => [
+    AIModel::MODEL_MINIMAX_M3 => [
         'speed' => [
-            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 4, 'topThroughputProvider' => 'Google', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 106, 'p75' => 147.5, 'p90' => 156.4, 'p99' => 165.5], 'throughputAvg' => ['p50' => 75.8, 'p75' => 97.2, 'p90' => 105.2, 'p99' => 117.4], 'latencyTop' => ['p50' => 623, 'p75' => 1192.5, 'p90' => 1934.6, 'p99' => 5884.7], 'latencyAvg' => ['p50' => 1085, 'p75' => 1395.4, 'p90' => 2069.6, 'p99' => 5119.3], 'sourceUrl' => 'https://openrouter.ai/minimax/minimax-m2', 'asOf' => '2026-06-17'],
-            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 655.0, 'timeToFirstTokenMs' => 560, 'sourceUrl' => 'https://deepinfra.com/blog/minimax-m2-5-api-benchmarks', 'asOf' => '2026-06'],
+            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 100.0, 'timeToFirstTokenMs' => 900, 'sourceUrl' => 'https://openrouter.ai/minimax/minimax-m3', 'asOf' => '2026-06'],
         ],
+        // Required for agent-eligibility: getAgentEligibleModels() filters on agenticScore !== null (weighted mean over
+        // AGENTIC_WEIGHTS). τ²-bench 88.9 (benchlm.ai — SAME source/scale as GLM-5.2's 99.1 and Gemini 3.5 Flash's 95.3;
+        // MiniMax M2.7 = 84.8 there, so M3 is the stronger successor). M3's headline published numbers are SWE-bench
+        // *Pro* 59.0, Terminal-Bench 2.1 66.0, MCP-Atlas 74.2 — none is a weighted benchmark constant (SWE-bench Pro is
+        // NOT SWE_BENCH_VERIFIED), so they live in the description, not as benchmark rows.
         'benchmarks' => [
-            ['benchmark' => AIModelBenchmarks::BENCHMARK_TAU_BENCH, 'score' => 76.2, 'sourceUrl' => 'https://artificialanalysis.ai/models/comparisons/qwen3-6-plus-vs-minimax-m2-7', 'asOf' => '2026-06'],
-            ['benchmark' => AIModelBenchmarks::BENCHMARK_BFCL, 'score' => 34.2, 'sourceUrl' => 'https://www.spheron.network/blog/tool-calling-benchmarks-bfcl-tau-bench-latency-optimization/', 'asOf' => '2026-06'],
-            ['benchmark' => AIModelBenchmarks::BENCHMARK_SWE_BENCH_VERIFIED, 'score' => 69.4, 'sourceUrl' => 'https://www.spheron.network/blog/tool-calling-benchmarks-bfcl-tau-bench-latency-optimization/', 'asOf' => '2026-06'],
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TAU_BENCH, 'score' => 88.9, 'sourceUrl' => 'https://benchlm.ai/benchmarks/tau2Bench', 'asOf' => '2026-06'],
         ],
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_MINIMAX,
         'agentTier' => AIModel::AGENT_TIER_CHEAP,
-        'externalId' => 'minimax-m2',
-        'openRouterExternalId' => 'minimax/minimax-m2',
-        'description' => 'MiniMax M2 — agentic MoE (~10B active), strongest tau-bench of the cheap Chinese group, fast + cheap. Chinese model served via Western OpenRouter providers. CHEAP tier — promoted from test candidate after the RC ADO agentic eval (2026-06-13: strongest tau-bench of the cheap group).',
+        'externalId' => 'minimax-m3',
+        'openRouterExternalId' => 'minimax/minimax-m3',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'MiniMax M3 (GA 2026-06-01) — MSA-architecture agentic MoE, REASONING + native multimodal (text/image/video), 1M context. Replaces M2 in the cheap Chinese group: SWE-bench Pro 59.0, Terminal-Bench 2.1 66.0, MCP-Atlas 74.2, τ²-bench 88.9 — frontier-class agentic at ~5–10% of GPT-5.5/Gemini-3.1-Pro cost. Chinese model served via Western OpenRouter providers. CHEAP tier ($0.30/$1.20 per 1M).',
         'settings' => [
-            'maxTokens' => 204800,
-            'maxInputTokens' => 204800,
+            'maxTokens' => 1048576,
+            'maxInputTokens' => 1048576,
             'maxOutputTokens' => 65536,
-            'maxPracticallyUsableInputTokens' => 131072,
-            'costsPer1000InputTokensInUSD' => 0.00026,
-            'costsPer1000OuputTokensInUSD' => 0.001,
+            'maxPracticallyUsableInputTokens' => 524288,
+            'costsPer1000InputTokensInUSD' => 0.0003,
+            'costsPer1000OuputTokensInUSD' => 0.0012,
+            'costsPer1000CachedInputTokensInUSD' => 0.00006,
         ],
     ],
     AIModel::MODEL_ALIBABA_QWEN3_235B_INSTRUCT => [

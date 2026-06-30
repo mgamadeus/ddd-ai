@@ -427,7 +427,7 @@ class AIModel extends Entity
     public const string MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE = 'GOOGLE.GEMINI_2_5_FLASH_LITE';
 
     // ===== Chinese open-weight agentic candidates (served via Western OpenRouter providers) — added 2026-06 =====
-    public const string MODEL_MINIMAX_M2 = 'MINIMAX.M2';
+    public const string MODEL_MINIMAX_M3 = 'MINIMAX.M3';
 
     public const string MODEL_ALIBABA_QWEN3_235B_INSTRUCT = 'ALIBABA.QWEN3_235B_INSTRUCT';
 
