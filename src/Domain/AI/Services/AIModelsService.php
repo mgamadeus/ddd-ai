@@ -334,9 +334,13 @@ class AIModelsService extends Service
         // [tier, interactive, objective, requiresToolCalling, appliesAgentLoopClassification]. FAST_CHEAP does NOT use
         // the agent-loop classification — it selects across the WHOLE catalog under a cost ceiling so an
         // agent-ineligible-but-fast model (gpt-oss-120b @ Cerebras) can win, ranked by raw throughput (plan 28 §5).
-        [$tier, $interactive, $objective, $requiresToolCalling, $appliesAgentLoopClassification] = match ($scope) {
-            ModelScope::AGENTIC => [ModelTier::CHEAP, true, ModelObjective::CAPABILITY, true, true],
-            ModelScope::COMPACTION => [ModelTier::CHEAP, false, ModelObjective::COST, true, true],
+        // 6th element = requiresAgentEligible (DECOUPLED from appliesAgentLoopClassification): MEMORY_MANAGEMENT keeps
+        // the agentTier filter (stays in the CHEAP band) but does NOT require agentEligible — its op is structured-JSON
+        // extract/reconcile, not the interactive tool-calling agent, so a strong cheap model held out of the live agent
+        // (agentEligible=false, e.g. a reasoning model with non-uniform provider tool-calling) must still win it.
+        [$tier, $interactive, $objective, $requiresToolCalling, $appliesAgentLoopClassification, $requiresAgentEligible] = match ($scope) {
+            ModelScope::AGENTIC => [ModelTier::CHEAP, true, ModelObjective::CAPABILITY, true, true, true],
+            ModelScope::COMPACTION => [ModelTier::CHEAP, false, ModelObjective::COST, true, true, true],
             // MEMORY_MANAGEMENT selects over the hand-vetted agent-CHEAP band (appliesAgentLoopClassification = true) by
             // CAPABILITY — the memory curator's extract (type/scope classification) and reconcile (ADD/UPDATE/INVALIDATE/
             // CONFLICT) decisions are quality-dominant, so it wants the SMARTEST cheap model, not the whole-catalog
@@ -344,11 +348,11 @@ class AIModelsService extends Service
             // type/scope classification than the throughput pick gpt-oss-120b, AND cheaper $0.09 vs $0.20/1M; the op is
             // async so raw throughput is irrelevant). Non-interactive + no tool-calling required (memory ops are plain
             // JSON-output language ops). It is therefore NO LONGER lock-stepped with FAST_CHEAP.
-            ModelScope::MEMORY_MANAGEMENT => [ModelTier::CHEAP, false, ModelObjective::CAPABILITY, false, true],
+            ModelScope::MEMORY_MANAGEMENT => [ModelTier::CHEAP, false, ModelObjective::CAPABILITY, false, true, false],
             // FAST_CHEAP = the non-agentic, no-tool-calling SPEED pick over the WHOLE cheap catalog under the cost
             // ceiling, ranked by throughput (its best model, gpt-oss-120b @ Cerebras, sits outside the agent-CHEAP band).
-            ModelScope::FAST_CHEAP => [ModelTier::CHEAP, true, ModelObjective::SPEED, false, false],
-            default => [ModelTier::CHEAP, false, ModelObjective::COST, true, true],
+            ModelScope::FAST_CHEAP => [ModelTier::CHEAP, true, ModelObjective::SPEED, false, false, false],
+            default => [ModelTier::CHEAP, false, ModelObjective::COST, true, true, true],
         };
         // The FAST_CHEAP cost ceiling defines "cheap" when agent-tier membership no longer does (blended $/1M tokens).
         $maxBlendedCostPer1MUsd = $appliesAgentLoopClassification ? null : self::FAST_CHEAP_MAX_BLENDED_COST_PER_1M_USD;
@@ -359,6 +363,7 @@ class AIModelsService extends Service
                 interactive: $interactive,
                 requiresToolCalling: $requiresToolCalling,
                 appliesAgentLoopClassification: $appliesAgentLoopClassification,
+                requiresAgentEligible: $requiresAgentEligible,
             ),
             requiredInputTokens: $requiredInputTokens,
             scope: $scope,
@@ -420,7 +425,7 @@ class AIModelsService extends Service
             // non-chainers) is required for agent-classified scopes; native tool-calling only when the policy demands
             // it (agentic scopes). A NON-agentic scope (FAST_CHEAP rerank, compaction, memory) sets
             // requiresToolCalling=false, so a fast non-tool model stays eligible (plan 28 §5).
-            if ($policy->appliesAgentLoopClassification && !$candidate->agentEligible) {
+            if ($policy->requiresAgentEligible && !$candidate->agentEligible) {
                 continue;
             }
             if ($policy->requiresToolCalling && !$candidate->supportsNativeToolCalling) {

@@ -46,6 +46,17 @@ class ModelManagerPolicy extends ValueObject
      */
     public bool $appliesAgentLoopClassification;
 
+    /**
+     * @var bool Whether the `agentEligible` gate constrains selection — DECOUPLED from {@see $appliesAgentLoopClassification}
+     *      so a scope can stay inside the agent-CHEAP tier band (tier filter ON) yet still consider agent-INELIGIBLE
+     *      models. Set FALSE for non-agent-loop scopes whose op is plain structured-JSON output, NOT the interactive
+     *      tool-calling agent: MEMORY_MANAGEMENT (extract/reconcile) must NOT depend on agentEligible — a strong cheap
+     *      model that is great at memory classification but is held out of the live agent (e.g. a reasoning model with
+     *      non-uniform tool-calling across providers) must still win the memory curator. Defaults to true (the agent
+     *      loop's default); only the curator/background scopes set it false.
+     */
+    public bool $requiresAgentEligible;
+
     public function __construct(
         string $preferredTier,
         ?string $preferredVendor = null,
@@ -53,6 +64,7 @@ class ModelManagerPolicy extends ValueObject
         bool $interactive = false,
         bool $requiresToolCalling = true,
         bool $appliesAgentLoopClassification = true,
+        bool $requiresAgentEligible = true,
     ) {
         parent::__construct();
         $this->preferredTier = $preferredTier;
@@ -61,5 +73,6 @@ class ModelManagerPolicy extends ValueObject
         $this->interactive = $interactive;
         $this->requiresToolCalling = $requiresToolCalling;
         $this->appliesAgentLoopClassification = $appliesAgentLoopClassification;
+        $this->requiresAgentEligible = $requiresAgentEligible;
     }
 }

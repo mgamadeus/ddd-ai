@@ -866,6 +866,10 @@ return [
     ],
     AIModel::MODEL_GOOGLE_GEMINI_2_5_FLASH => [
         'agentTier' => AIModel::AGENT_TIER_CHEAP,
+        // Held out of the live agent loop: Gemini emits a tool-call turn with EMPTY content (no same-turn status
+        // text) over OpenRouter and intermittently returns a function call as malformed text — too unreliable for
+        // the interactive agent. Stays in the CHEAP tier band for non-agent scopes that don't read agentEligible.
+        'agentEligible' => false,
         'contextWindowTokens' => 1_000_000,
         'effectiveContextTokens' => 128_000, // compaction threshold — Gemini MRCR strong @128k, degrades by 1M (absolute, not window-%)
         'speed' => [
@@ -1362,6 +1366,10 @@ return [
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_MINIMAX,
         'agentTier' => AIModel::AGENT_TIER_CHEAP,
+        // MEMORY-CURATOR ONLY — held out of the live agent loop: tool-calling is not uniform across OpenRouter
+        // providers and the reasoning pass is too slow/costly for the interactive agent. Stays in the CHEAP tier band
+        // for the MEMORY_MANAGEMENT scope, which does NOT require agentEligible.
+        'agentEligible' => false,
         'externalId' => 'minimax-m3',
         'openRouterExternalId' => 'minimax/minimax-m3',
         'isReasoningModel' => true,
