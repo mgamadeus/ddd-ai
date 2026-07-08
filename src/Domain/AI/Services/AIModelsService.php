@@ -352,6 +352,12 @@ class AIModelsService extends Service
             // FAST_CHEAP = the non-agentic, no-tool-calling SPEED pick over the WHOLE cheap catalog under the cost
             // ceiling, ranked by throughput (its best model, gpt-oss-120b @ Cerebras, sits outside the agent-CHEAP band).
             ModelScope::FAST_CHEAP => [ModelTier::CHEAP, true, ModelObjective::SPEED, false, false, false],
+            // SUMMARIZATION = a quality-leaning STANDARD-tier one-off (product/plan/flag descriptions, cached 24h).
+            // A tier ABOVE the cost-dominant COMPACTION summarizer because it is low-volume and its output is a
+            // customer-facing product description, so it selects the SMARTEST model in the curated STANDARD band
+            // (appliesAgentLoopClassification = true keeps it in the tier band, no cost ceiling). Non-interactive, no
+            // tool-calling, and NOT agent-eligible-gated (mirrors MEMORY_MANAGEMENT: a plain text/JSON language op).
+            ModelScope::SUMMARIZATION => [ModelTier::STANDARD, false, ModelObjective::CAPABILITY, false, true, false],
             default => [ModelTier::CHEAP, false, ModelObjective::COST, true, true, true],
         };
         // The FAST_CHEAP cost ceiling defines "cheap" when agent-tier membership no longer does (blended $/1M tokens).

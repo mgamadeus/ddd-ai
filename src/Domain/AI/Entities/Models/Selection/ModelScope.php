@@ -26,12 +26,18 @@ class ModelScope
      *  SPEED objective, cheap. Resolves to the fastest cheap model (e.g. gpt-oss-120b, provider-pinned to Cerebras). */
     public const string FAST_CHEAP = 'FAST_CHEAP';
 
+    /** General LLM summarization — a quality-leaning STANDARD-tier one-off (e.g. the product-aware agent's per-
+     *  ProductRatePlan / per-FeatureFlag descriptions, cached 24h): non-interactive, no tool-calling, low volume, so it
+     *  sits a tier ABOVE the cost-dominant COMPACTION summarizer (CHEAP/COST). CAPABILITY over the STANDARD band. */
+    public const string SUMMARIZATION = 'SUMMARIZATION';
+
     /** @var array<int, string> All scopes. */
     public const array ALL = [
         self::AGENTIC,
         self::COMPACTION,
         self::MEMORY_MANAGEMENT,
         self::FAST_CHEAP,
+        self::SUMMARIZATION,
     ];
 
     public static function isValid(string $scope): bool
