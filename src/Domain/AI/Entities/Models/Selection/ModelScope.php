@@ -31,6 +31,10 @@ class ModelScope
      *  sits a tier ABOVE the cost-dominant COMPACTION summarizer (CHEAP/COST). CAPABILITY over the STANDARD band. */
     public const string SUMMARIZATION = 'SUMMARIZATION';
 
+    /** Conversation ORCHESTRATOR / supervisor checkpoints (Über-ADO, plan 61): async, briefing-in/JSON-out,
+     * quality-dominant — must out-think the turn models, so it selects by CAPABILITY over the STANDARD band. */
+    public const string ORCHESTRATOR = 'ORCHESTRATOR';
+
     /** @var array<int, string> All scopes. */
     public const array ALL = [
         self::AGENTIC,
@@ -38,6 +42,7 @@ class ModelScope
         self::MEMORY_MANAGEMENT,
         self::FAST_CHEAP,
         self::SUMMARIZATION,
+        self::ORCHESTRATOR,
     ];
 
     public static function isValid(string $scope): bool

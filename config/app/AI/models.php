@@ -1351,6 +1351,42 @@ return [
     //    pinned to Western providers before production use). Qwen3-235B + MiniMax M2 promoted to AGENT_TIER_CHEAP
     //    after the RC ADO agentic eval (2026-06-13). Kimi K2 stays a TEST candidate (no agentTier) — STANDARD
     //    cost band + profile-write collapse. ──
+    // ORCHESTRATOR candidates (Über-ADO supervisor): Chinese high-/mid-price frontier models — checkpoint
+    // supervision only (agentEligible=false, never the interactive tool loop). Pricing/slugs: VERIFY on OpenRouter.
+    AIModel::MODEL_MOONSHOT_KIMI_K3 => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_MOONSHOT,
+        'agentEligible' => false,
+        'agentTier' => AIModel::AGENT_TIER_STANDARD,
+        'externalId' => 'kimi-k3',
+        'openRouterExternalId' => 'moonshotai/kimi-k3',
+        'isReasoningModel' => true,
+        'description' => 'Kimi K3 (Moonshot, 2026) — Chinese overall leader (~79.9 aggregate, Terminal-Bench 2.1 88.3): the long-horizon/agentic frontier class. HIGH-price Chinese segment; ORCHESTRATOR escalation candidate.',
+        'settings' => [
+            'maxTokens' => 262144,
+            'maxInputTokens' => 262144,
+            'maxOutputTokens' => 32768,
+            'costsPer1000InputTokensInUSD' => 0.0012,
+            'costsPer1000OuputTokensInUSD' => 0.005,
+        ],
+    ],
+    AIModel::MODEL_DEEPSEEK_V3_2 => [
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_DEEPSEEK,
+        'agentEligible' => false,
+        'agentTier' => AIModel::AGENT_TIER_STANDARD,
+        'externalId' => 'deepseek-v3.2',
+        'openRouterExternalId' => 'deepseek/deepseek-v3.2',
+        'isReasoningModel' => true,
+        'description' => 'DeepSeek V3.2 (2026) — rivals Western frontier models on coding/agentic benchmarks (BenchLM) at a fraction of the cost. MID-price Chinese segment; ORCHESTRATOR default candidate.',
+        'settings' => [
+            'maxTokens' => 163840,
+            'maxInputTokens' => 163840,
+            'maxOutputTokens' => 32768,
+            'costsPer1000InputTokensInUSD' => 0.00028,
+            'costsPer1000OuputTokensInUSD' => 0.00042,
+        ],
+    ],
     AIModel::MODEL_MINIMAX_M3 => [
         'speed' => [
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 100.0, 'timeToFirstTokenMs' => 900, 'sourceUrl' => 'https://openrouter.ai/minimax/minimax-m3', 'asOf' => '2026-06'],

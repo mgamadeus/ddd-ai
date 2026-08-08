@@ -352,6 +352,11 @@ class AIModelsService extends Service
             // FAST_CHEAP = the non-agentic, no-tool-calling SPEED pick over the WHOLE cheap catalog under the cost
             // ceiling, ranked by throughput (its best model, gpt-oss-120b @ Cerebras, sits outside the agent-CHEAP band).
             ModelScope::FAST_CHEAP => [ModelTier::CHEAP, true, ModelObjective::SPEED, false, false, false],
+            // ORCHESTRATOR (Über-ADO supervisor, plan 61): async checkpoint calls — briefing in, JSON verdict out.
+            // Quality-dominant (must out-think the CHEAP turn models) → CAPABILITY over the STANDARD band; not
+            // interactive, no tool calling, and NOT agent-loop-filtered (the best reasoning candidates may be
+            // agentEligible=false — the supervisor never runs the interactive tool loop).
+            ModelScope::ORCHESTRATOR => [ModelTier::STANDARD, false, ModelObjective::CAPABILITY, false, false, false],
             // SUMMARIZATION = a quality-leaning STANDARD-tier one-off (product/plan/flag descriptions, cached 24h).
             // A tier ABOVE the cost-dominant COMPACTION summarizer because it is low-volume and its output is a
             // customer-facing product description, so it selects the SMARTEST model in the curated STANDARD band

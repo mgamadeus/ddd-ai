@@ -80,6 +80,9 @@ class AIModel extends Entity
     /** @var string Model Vendor Moonshot AI / Kimi (China; served via Western OpenRouter providers) */
     public const string VENDOR_MOONSHOT = 'MOONSHOT';
 
+    /** @var string Model Vendor DeepSeek (China; served via Western OpenRouter providers) */
+    public const string VENDOR_DEEPSEEK = 'DEEPSEEK';
+
     /** @var string Model Vendor Alibaba / Qwen (China; served via Western OpenRouter providers) */
     public const string VENDOR_ALIBABA = 'ALIBABA';
 
@@ -432,6 +435,10 @@ class AIModel extends Entity
     public const string MODEL_ALIBABA_QWEN3_235B_INSTRUCT = 'ALIBABA.QWEN3_235B_INSTRUCT';
 
     public const string MODEL_MOONSHOT_KIMI_K2 = 'MOONSHOT.KIMI_K2';
+
+    public const string MODEL_MOONSHOT_KIMI_K3 = 'MOONSHOT.KIMI_K3';
+
+    public const string MODEL_DEEPSEEK_V3_2 = 'DEEPSEEK.V3_2';
 
     public const string MODEL_ZAI_GLM_5_2 = 'ZAI.GLM_5_2';
 
