@@ -309,6 +309,20 @@ class AIModelsService extends Service
     protected static array $selectionCache = [];
 
     /**
+     * Scope → PINNED default model (TIER-INDEPENDENT). A scope in this map is NOT resolved by the price-tier heuristic
+     * in {@see buildScopeContext()}; its default is a NAMED model chosen on merit (an eval gate), because the scope is
+     * its own eligibility dimension, not a price tier. ORCHESTRATOR (Über-ADO supervisor, plan 61): MiniMax M3 — the
+     * supervisor-eval-gate winner (0% wrong-decision at the lowest cost). A consumer overrides it per call (the ADO
+     * supervisor's per-conversation `orchestratorModelNameOverride`). The scope's `buildScopeContext` tuple is only the
+     * FALLBACK, used when the pinned model is absent/removed from the catalog.
+     *
+     * @var array<string, string>
+     */
+    protected const array SCOPE_PINNED_DEFAULT_MODELS = [
+        ModelScope::ORCHESTRATOR => AIModel::MODEL_MINIMAX_M3,
+    ];
+
+    /**
      * The model for a {@see ModelScope} (AGENTIC / COMPACTION / MEMORY_MANAGEMENT / FAST_CHEAP) — the central,
      * scope-aware entry the features call instead of hardcoding a model. Maps the scope to its selection policy and
      * resolves the eligible model in that band, cached by context.
@@ -317,6 +331,14 @@ class AIModelsService extends Service
      */
     public function getModelForScope(string $scope, ?int $requiredInputTokens = null): ?AIModel
     {
+        // A pinned, tier-independent default wins over the tier heuristic (the orchestrator scope is not a price tier).
+        $pinnedDefaultModelName = self::SCOPE_PINNED_DEFAULT_MODELS[$scope] ?? null;
+        if ($pinnedDefaultModelName !== null) {
+            $pinnedModel = $this->getAIModelByName($pinnedDefaultModelName);
+            if ($pinnedModel !== null) {
+                return $pinnedModel;
+            }
+        }
         return $this->selectModel($this->buildScopeContext($scope, $requiredInputTokens));
     }
 
@@ -353,9 +375,10 @@ class AIModelsService extends Service
             // ceiling, ranked by throughput (its best model, gpt-oss-120b @ Cerebras, sits outside the agent-CHEAP band).
             ModelScope::FAST_CHEAP => [ModelTier::CHEAP, true, ModelObjective::SPEED, false, false, false],
             // ORCHESTRATOR (Über-ADO supervisor, plan 61): async checkpoint calls — briefing in, JSON verdict out.
-            // Quality-dominant (must out-think the CHEAP turn models) → CAPABILITY over the STANDARD band; not
-            // interactive, no tool calling, and NOT agent-loop-filtered (the best reasoning candidates may be
-            // agentEligible=false — the supervisor never runs the interactive tool loop).
+            // The scope is TIER-INDEPENDENT — its default is a PINNED model ({@see SCOPE_PINNED_DEFAULT_MODELS} = M3,
+            // the eval-gate winner), so getModelForScope short-circuits before this tuple. This tuple is only the
+            // FALLBACK when the pinned model is absent: a quality pick (CAPABILITY) with no tool calling and no
+            // agent-loop filter (the supervisor never runs the interactive tool loop).
             ModelScope::ORCHESTRATOR => [ModelTier::STANDARD, false, ModelObjective::CAPABILITY, false, false, false],
             // SUMMARIZATION = a quality-leaning STANDARD-tier one-off (product/plan/flag descriptions, cached 24h).
             // A tier ABOVE the cost-dominant COMPACTION summarizer because it is low-volume and its output is a
