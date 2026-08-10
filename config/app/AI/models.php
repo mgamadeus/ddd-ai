@@ -1370,23 +1370,6 @@ return [
             'costsPer1000OuputTokensInUSD' => 0.005,
         ],
     ],
-    AIModel::MODEL_DEEPSEEK_V3_2 => [
-        'type' => AIModel::TYPE_LANGUAGE,
-        'vendor' => AIModel::VENDOR_DEEPSEEK,
-        'agentEligible' => false,
-        'agentTier' => AIModel::AGENT_TIER_STANDARD,
-        'externalId' => 'deepseek-v3.2',
-        'openRouterExternalId' => 'deepseek/deepseek-v3.2',
-        'isReasoningModel' => true,
-        'description' => 'DeepSeek V3.2 (2026) — rivals Western frontier models on coding/agentic benchmarks (BenchLM) at a fraction of the cost. MID-price Chinese segment; ORCHESTRATOR default candidate.',
-        'settings' => [
-            'maxTokens' => 163840,
-            'maxInputTokens' => 163840,
-            'maxOutputTokens' => 32768,
-            'costsPer1000InputTokensInUSD' => 0.00028,
-            'costsPer1000OuputTokensInUSD' => 0.00042,
-        ],
-    ],
     AIModel::MODEL_MINIMAX_M3 => [
         'speed' => [
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 100.0, 'timeToFirstTokenMs' => 900, 'sourceUrl' => 'https://openrouter.ai/minimax/minimax-m3', 'asOf' => '2026-06'],
