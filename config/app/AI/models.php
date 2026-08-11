@@ -4,6 +4,15 @@ use DDD\Domain\AI\Entities\Models\AIModel;
 use DDD\Domain\AI\Entities\Models\Benchmarks\AIModelBenchmarks;
 use DDD\Domain\AI\Entities\Models\Speed\AIModelSpeedMeasurements;
 
+// PRICING OVER A GATEWAY (applies to every entry reached via OpenRouter, especially the OPENAI family):
+// a vendor's announced list price is NOT a reliable catalog value. OpenRouter exposes multiple service tiers
+// per OpenAI model — flex (0.5x) / default (1x) / priority (2x) — plus Azure and Bedrock routes, and a slug
+// sent WITHOUT a tag suffix resolves to the DEFAULT tier. A vendor announcement may correspond to a different
+// tier than the one the egress actually hits (e.g. GPT-5.6: the announced price is the priority tier for
+// Luna/Terra but the standard tier for Sol). The authoritative source is the gateway's per-endpoint API
+// (GET /api/v1/models/<slug>/endpoints) for the exact slug+tag the caller sends. The flex tier at 0.5x is a
+// real, unexploited cost lever for throughput-bound batch work where latency does not matter.
+
 return [
     // ── GPT-4o family (still widely used, multimodal) ──────────────────────
     AIModel::MODEL_OPENAI_GPT4_O => [
@@ -1288,10 +1297,12 @@ return [
         // leaderboard entirely (checked 2026-08-11, 144 models). So it carries no agenticScore by design; our own
         // eval suite is the evidence.
         //
-        // PRICING: the numbers below are OpenRouter's, because the agent egress calls openrouter.ai DIRECTLY
-        // (ArgusAIAgentConversation) — that is what we actually pay. They are HALF of OpenAI's own announced
-        // post-cut list price ($0.20/$1.20 per 1M, 2026-07-30); Terra shows the same halving while Sol matches list.
-        // Re-check on the next catalog pass.
+        // PRICING: these are OpenRouter's DEFAULT-TIER (`openai`) numbers, because the agent egress calls
+        // openrouter.ai DIRECTLY (ArgusAIAgentConversation) and sends the slug WITHOUT a tag suffix, which resolves
+        // to that tier. OpenRouter offers three OpenAI service tiers per model — flex (0.5x) / default (1x) /
+        // priority (2x) — plus Azure and Bedrock routes; OpenAI's publicly announced $0.20/$1.20 is the PRIORITY
+        // tier, not a different price for the same thing. A downstream on Azure or Bedrock pays that doubled rate
+        // and must override these settings.
         'speed' => [],
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_OPENAI,
