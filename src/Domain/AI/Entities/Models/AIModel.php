@@ -422,6 +422,16 @@ class AIModel extends Entity
 
     public const string MODEL_OPENAI_GPT5_5_PRO = 'OPENAI.GPT5_5_PRO';
 
+    // ===== OpenAI GPT-5.6 family (Sol / Terra / Luna) — added 2026-08 =====
+
+    /**
+     * @var string OpenAI GPT-5.6 Luna Model
+     * @description Budget tier of the GPT-5.6 family (GA 2026-07-09). Reasoning + vision, 1.05M context.
+     * @usage Use for high-volume chat, classification and agentic tool-calling where cost per turn matters.
+     * @notes Reasoning model. $0.10/$0.60 per 1M via OpenRouter (cached input $0.01) — see the config entry.
+     */
+    public const string MODEL_OPENAI_GPT5_6_LUNA = 'OPENAI.GPT5_6_LUNA';
+
     public const string MODEL_GOOGLE_GEMINI_3_5_FLASH = 'GOOGLE.GEMINI_3_5_FLASH';
 
     public const string MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE = 'GOOGLE.GEMINI_2_5_FLASH_LITE';

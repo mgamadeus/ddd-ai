@@ -1275,6 +1275,44 @@ return [
             'costsPer1000OuputTokensInUSD' => 0.18,
         ],
     ],
+    AIModel::MODEL_OPENAI_GPT5_6_LUNA => [
+        // CANDIDATE — deliberately NO `agentTier`: it is reachable only via an explicit `--model` pin and appears in
+        // no tier selection until our own eval suite has measured it (the established candidate pattern, as used for
+        // gpt-oss-120b / MiniMax M2 / Kimi K2).
+        //
+        // NO `benchmarks` entry either, and that is the load-bearing point: OpenAI publishes Terminal-Bench 2.1 (84.7)
+        // and SWE-Bench *Pro* (62.7) for Luna, and Artificial Analysis publishes its own Coding-Agent index (75) —
+        // NONE of these is one of the five benchmarks AIModelBenchmarks::AGENTIC_WEIGHTS scores over (BFCL, τ-bench,
+        // GAIA, SWE-bench VERIFIED, AgentBench). Adding SWE-Bench Pro under the SWE_BENCH_VERIFIED id would mislabel
+        // the datapoint (same reasoning as the Gemini 3.5 Flash entry below). Luna is absent from the τ²-bench
+        // leaderboard entirely (checked 2026-08-11, 144 models). So it carries no agenticScore by design; our own
+        // eval suite is the evidence.
+        //
+        // PRICING: the numbers below are OpenRouter's, because the agent egress calls openrouter.ai DIRECTLY
+        // (ArgusAIAgentConversation) — that is what we actually pay. They are HALF of OpenAI's own announced
+        // post-cut list price ($0.20/$1.20 per 1M, 2026-07-30); Terra shows the same halving while Sol matches list.
+        // Re-check on the next catalog pass.
+        'speed' => [],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_OPENAI,
+        'externalId' => 'gpt-5.6-luna',
+        // Agentic: `low` mirrors GPT-5.4-mini — the same OpenAI reasoning family, same known load_skills→reasoning-only
+        // empty-turn stall. Re-tune only if an eval shows it under-reasons.
+        'agenticUseCase' => ['reasoningEffort' => 'low'],
+        'openRouterExternalId' => 'openai/gpt-5.6-luna',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'OpenAI GPT-5.6 Luna (GA 2026-07-09): the budget tier of the Sol/Terra/Luna family, for high-volume chat, classification and lightweight agentic work. 1.05M context, 128K output. Text+image, reasoning.',
+        'settings' => [
+            'maxTokens' => 1178000,
+            'maxInputTokens' => 1050000,
+            'maxOutputTokens' => 128000,
+            'maxPracticallyUsableInputTokens' => 525000,
+            'costsPer1000InputTokensInUSD' => 0.0001,
+            'costsPer1000OuputTokensInUSD' => 0.0006,
+            'costsPer1000CachedInputTokensInUSD' => 0.00001,
+        ],
+    ],
     AIModel::MODEL_GOOGLE_GEMINI_3_5_FLASH => [
         // STANDARD tier — the GOOGLE option in STANDARD (the gap: STANDARD had only GPT-5 / GPT-5.4-mini / Claude
         // Haiku 4.5, no Google). Agentic-optimized Flash with NATIVE parallel function calling (multiple tool_calls per
