@@ -18,6 +18,15 @@ use DDD\Domain\Base\Entities\ObjectSet;
  *   GAIA (general assistant with tools)              0.20  — tool-use reasoning, broad
  *   SWE-bench Verified (coding agent)                0.05  — agentic anchor, low domain overlap
  *   AgentBench (multi-environment agent)             0.05  — breadth
+ *   Terminal-Bench 2.1 (agent in a real shell)       0.05  — breadth, and the ONLY one the 2026 generation still reports
+ *
+ * On Terminal-Bench (added 2026-08): the four older entries are drying up for new models — BFCL's v4 rewrite carries
+ * no Google model at all, τ²-bench was superseded upstream by τ³-Banking, and GAIA/AgentBench see no 2026 releases.
+ * Vendors instead publish Terminal-Bench 2.1 (Google for Gemini 3.5/3.6 Flash, OpenAI for the GPT-5.6 family), so
+ * without it a 2026 model scores `null` and getAgentEligibleModels() hides it — capability irrelevant. It carries the
+ * same low 0.05 weight as the other breadth anchors: enough to make a model VISIBLE, not enough to dominate a blend
+ * that has BFCL or τ-bench in it. The weights deliberately no longer sum to 1.0 — getAgenticIntelligenceScore()
+ * renormalises over whichever benchmarks are present, so the sum never mattered.
  *
  * The blend is a pure function of the present, weighted scores (renormalised), so a model rated on only a subset
  * still yields a comparable score. Distinct from raw chat quality and from cost — it isolates the agentic axis.
@@ -39,6 +48,10 @@ class AIModelBenchmarks extends ObjectSet
 
     public const string BENCHMARK_AGENT_BENCH = 'AGENT_BENCH';
 
+    /** @var string Terminal-Bench 2.1 — an agent solving real tasks in a shell. The benchmark 2026-generation vendors
+     *      actually publish; see the class docblock for why it was added. */
+    public const string BENCHMARK_TERMINAL_BENCH = 'TERMINAL_BENCH';
+
     /** @var array<string, float> Blend weights by benchmark id (relevance to the in-process agentic tool-use loop). */
     public const array AGENTIC_WEIGHTS = [
         self::BENCHMARK_BFCL => 0.40,
@@ -46,6 +59,7 @@ class AIModelBenchmarks extends ObjectSet
         self::BENCHMARK_GAIA => 0.20,
         self::BENCHMARK_SWE_BENCH_VERIFIED => 0.05,
         self::BENCHMARK_AGENT_BENCH => 0.05,
+        self::BENCHMARK_TERMINAL_BENCH => 0.05,
     ];
 
     /**

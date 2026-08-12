@@ -1285,17 +1285,18 @@ return [
         ],
     ],
     AIModel::MODEL_OPENAI_GPT5_6_LUNA => [
-        // CANDIDATE — deliberately NO `agentTier`: it is reachable only via an explicit `--model` pin and appears in
-        // no tier selection until our own eval suite has measured it (the established candidate pattern, as used for
-        // gpt-oss-120b / MiniMax M2 / Kimi K2).
+        // CHEAP tier + the ADO agent DEFAULT (owner decision 2026-08-12), on our own measurement rather than a
+        // published benchmark: 329-case suite, `--call` 291/329 (88.4%), `--judge` 299/329 (90.9%), both flavors
+        // green on 278/329 (84.5%) — and against the same-day baseline run on identical cases, +8 cases net.
+        // It sits in CHEAP because it IS the cheapest model we route: $0.0006 per warm turn measured, 6.7x below
+        // Qwen3-235B, which never gets cheaper because DeepInfra publishes no cached-input price for it. Our load is
+        // 99.2% input at a ~79% cache-hit rate, so a cached-input price dominates everything else — see the
+        // evaluation sheet's token-mix section.
         //
-        // NO `benchmarks` entry either, and that is the load-bearing point: OpenAI publishes Terminal-Bench 2.1 (84.7)
-        // and SWE-Bench *Pro* (62.7) for Luna, and Artificial Analysis publishes its own Coding-Agent index (75) —
-        // NONE of these is one of the five benchmarks AIModelBenchmarks::AGENTIC_WEIGHTS scores over (BFCL, τ-bench,
-        // GAIA, SWE-bench VERIFIED, AgentBench). Adding SWE-Bench Pro under the SWE_BENCH_VERIFIED id would mislabel
-        // the datapoint (same reasoning as the Gemini 3.5 Flash entry below). Luna is absent from the τ²-bench
-        // leaderboard entirely (checked 2026-08-11, 144 models). So it carries no agenticScore by design; our own
-        // eval suite is the evidence.
+        // Its ONLY AGENTIC_WEIGHTS datapoint is Terminal-Bench 2.1 (real, OpenAI-published). Deliberately nothing
+        // else: SWE-Bench *Pro* 62.7 and the AA Coding-Agent index 75 are NOT benchmarks in the weight map, and Luna
+        // is absent from the τ²-bench leaderboard entirely (checked 2026-08-11, 144 models). Filing either under a
+        // neighbouring id would mislabel the datapoint.
         //
         // PRICING: these are OpenRouter's DEFAULT-TIER (`openai`) numbers, because the agent egress calls
         // openrouter.ai DIRECTLY (ArgusAIAgentConversation) and sends the slug WITHOUT a tag suffix, which resolves
@@ -1303,7 +1304,17 @@ return [
         // priority (2x) — plus Azure and Bedrock routes; OpenAI's publicly announced $0.20/$1.20 is the PRIORITY
         // tier, not a different price for the same thing. A downstream on Azure or Bedrock pays that doubled rate
         // and must override these settings.
+        'agentTier' => AIModel::AGENT_TIER_CHEAP,
+        // No `speed` datapoint: OpenRouter publishes no endpoint stats for this slug (its stats API returns an empty
+        // body) and no verified provider throughput figure was found. Our own measurement — 9.6 s median for a whole
+        // agentic turn, 4151 effective tok/s — is NOT provider throughput (it includes tool round-trips and TTFT), so
+        // it must not be filed under `tokensPerSecond`; it lives in the evaluation sheet's speed ranking instead.
+        // Consequence to be aware of: the customer picker derives speedLevel from tokensPerSecond, so Luna renders at
+        // the lowest speed band until a real provider figure exists.
         'speed' => [],
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TERMINAL_BENCH, 'score' => 84.7, 'sourceUrl' => 'https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6/', 'asOf' => '2026-07'],
+        ],
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_OPENAI,
         'externalId' => 'gpt-5.6-luna',
@@ -1325,14 +1336,12 @@ return [
         ],
     ],
     AIModel::MODEL_GOOGLE_GEMINI_3_5_FLASH => [
-        // STANDARD tier — the GOOGLE option in STANDARD (the gap: STANDARD had only GPT-5 / GPT-5.4-mini / Claude
-        // Haiku 4.5, no Google). Agentic-optimized Flash with NATIVE parallel function calling (multiple tool_calls per
-        // turn) — unlike Gemini 3.0 Flash, which has the documented thought_signature parallel-call bug and avoids
-        // parallel calls entirely (https://discuss.ai.google.dev/t/why-does-gemini-3-flash-return-sequential-single-tool-calls-instead-of-batching-independent-ones/139771).
-        // Vendor positions 3.5 Flash above Gemini 3.1 Pro on agentic benchmarks (~83.6% MCP Atlas) at ~25% less than
-        // the Pro tier; cost $1.50/$9.00 per 1M sits in the STANDARD band. PENDING our agent-eval (single + judge) +
-        // a --debug run showing real parallel tool_calls/delegates before it is trusted for production selection.
-        'agentTier' => AIModel::AGENT_TIER_STANDARD,
+        // SUPERSEDED 2026-08-12 by MODEL_GOOGLE_GEMINI_3_6_FLASH, which holds the STANDARD Google slot now. The entry
+        // stays (still pinnable via an explicit --model, and every historical eval number in the evaluation sheet
+        // refers to THIS model) but carries no `agentTier`, so tier selection no longer resolves to it.
+        // Agentic-optimized Flash with NATIVE parallel function calling (multiple tool_calls per turn) — unlike
+        // Gemini 3.0 Flash, which has the documented thought_signature parallel-call bug and avoids parallel calls
+        // entirely (https://discuss.ai.google.dev/t/why-does-gemini-3-flash-return-sequential-single-tool-calls-instead-of-batching-independent-ones/139771).
         // Agentic: low thinking for fast, targeted tool-calls + parallel batching; Gemini 3.x mandates temperature 1.0
         // (stays null → provider default 1.0), as on 3.1 Pro.
         'agenticUseCase' => ['reasoningEffort' => 'low'],
@@ -1348,6 +1357,7 @@ return [
         // it is not added here (would mislabel the datapoint).
         'benchmarks' => [
             ['benchmark' => AIModelBenchmarks::BENCHMARK_TAU_BENCH, 'score' => 95.3, 'sourceUrl' => 'https://benchlm.ai/benchmarks/tau2Bench', 'asOf' => '2026-06'],
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TERMINAL_BENCH, 'score' => 76.2, 'sourceUrl' => 'https://deepmind.google/models/model-cards/gemini-3-6-flash/', 'asOf' => '2026-07'],
         ],
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_GOOGLE,
@@ -1363,6 +1373,54 @@ return [
             'maxPracticallyUsableInputTokens' => 524288,
             'costsPer1000InputTokensInUSD' => 0.0015,
             'costsPer1000OuputTokensInUSD' => 0.009,
+            'costsPer1000CachedInputTokensInUSD' => 0.00015,
+        ],
+    ],
+    AIModel::MODEL_GOOGLE_GEMINI_3_6_FLASH => [
+        // STANDARD tier — the GOOGLE slot, taken over from GEMINI_3_5_FLASH on 2026-08-12. Successor released
+        // 2026-07-21. Same envelope (1.05M context, 64K output) and same INPUT price; output drops $9.00 -> $7.50
+        // per 1M (-16.7%) on every OpenRouter tier, cached input unchanged at $0.15. Google additionally claims
+        // ~17% fewer output tokens for the same task ("fewer reasoning steps and tool calls"), which would compound
+        // to roughly -31% real output cost — a VENDOR CLAIM, unverified by our own eval suite.
+        // Native parallel function calling is documented by Google using THIS model as the example
+        // (https://ai.google.dev/gemini-api/docs/function-calling).
+        //
+        // Two live-verified caveats (probed directly against openrouter.ai on 2026-08-12):
+        //  - A request whose message list ENDS on an assistant turn is rejected with HTTP 400 "Requests ending with
+        //    a model turn are not supported." Our agent loop always ends on a user/tool entry, so it is unaffected —
+        //    but any prefill-style steering would break outright.
+        //  - `temperature` is documented as deprecated for this model yet is accepted (HTTP 200) alongside `tools`.
+        //    ArgusAIAgentConversation::getTemperature() forces 1.0 for every Google vendor model anyway.
+        'agentTier' => AIModel::AGENT_TIER_STANDARD,
+        // Agentic: unchanged from 3.5 Flash — low thinking for fast, targeted tool-calls + parallel batching.
+        'agenticUseCase' => ['reasoningEffort' => 'low'],
+        'speed' => [
+            ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 224.4, 'timeToFirstTokenMs' => 17210, 'sourceUrl' => 'https://artificialanalysis.ai/models/gemini-3-6-flash', 'asOf' => '2026-08-12'],
+        ],
+        // Terminal-Bench 2.1 is the ONLY AGENTIC_WEIGHTS benchmark this model has, and it is a real, vendor-published,
+        // correctly-labelled figure (Google's own evaluation PDF, Terminus-2 harness). There is deliberately no other
+        // row: 3.6 Flash has NO BFCL / τ-bench / GAIA / SWE-bench VERIFIED / AgentBench score anywhere — verified
+        // 2026-08-12 across the Gorilla harness (carries no Gemini past 3.1-Flash-Lite), the τ²-bench ledger
+        // (`tau2: null` at Artificial Analysis), swebench.com, Vals AI and pricepertoken. Its SWE-Bench *Pro* 58.7 and
+        // τ³-Banking 29.9 are NOT these benchmarks and would mislabel the datapoint / corrupt the blend's scale; both
+        // are recorded in knowledge/domain/ai/ado-agentic-evaluation-sheet.md instead.
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TERMINAL_BENCH, 'score' => 78.0, 'sourceUrl' => 'https://deepmind.google/models/model-cards/gemini-3-6-flash/', 'asOf' => '2026-07'],
+        ],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_GOOGLE,
+        'externalId' => 'gemini-3.6-flash',
+        'openRouterExternalId' => 'google/gemini-3.6-flash',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Gemini 3.6 Flash (GA 2026-07-21): successor to 3.5 Flash for sustained agentic tool-calling and coding, configurable thinking. Multimodal, 1.05M context, 64K output, cutoff March 2026.',
+        'settings' => [
+            'maxTokens' => 1114112,
+            'maxInputTokens' => 1048576,
+            'maxOutputTokens' => 65536,
+            'maxPracticallyUsableInputTokens' => 524288,
+            'costsPer1000InputTokensInUSD' => 0.0015,
+            'costsPer1000OuputTokensInUSD' => 0.0075,
             'costsPer1000CachedInputTokensInUSD' => 0.00015,
         ],
     ],

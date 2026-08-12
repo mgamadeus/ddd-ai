@@ -320,6 +320,13 @@ class AIModelsService extends Service
      */
     protected const array SCOPE_PINNED_DEFAULT_MODELS = [
         ModelScope::ORCHESTRATOR => AIModel::MODEL_MINIMAX_M3,
+        // AGENTIC pinned to GPT-5.6 Luna on 2026-08-12 (owner decision). Pinned rather than left to the CHEAP-band
+        // heuristic because that heuristic ranks on `blendedCostPer1MUsd`, which is blind to cached input and
+        // therefore ranks Luna ABOVE Qwen3-235B on cost ($0.250 vs $0.093 blended) while the measured reality is the
+        // exact opposite: $0.0006 vs $0.0040 per warm turn. Our agent load is 99.2% input at a ~79% cache-hit rate
+        // and DeepInfra publishes no cached-input price for Qwen, so the blended metric inverts the true ranking.
+        // Until the cost model accounts for cached input, an explicit pin is the honest way to express the decision.
+        ModelScope::AGENTIC => AIModel::MODEL_OPENAI_GPT5_6_LUNA,
     ];
 
     /**

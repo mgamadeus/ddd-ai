@@ -434,6 +434,15 @@ class AIModel extends Entity
 
     public const string MODEL_GOOGLE_GEMINI_3_5_FLASH = 'GOOGLE.GEMINI_3_5_FLASH';
 
+    /**
+     * @var string Google Gemini 3.6 Flash Model
+     * @description Successor to 3.5 Flash (GA 2026-07-21). Same 1.05M context and price-in, ~17% cheaper output,
+     *      ~27% faster, far stronger long-context retrieval. Native parallel function calling.
+     * @usage The default STANDARD-tier Google agent model — sustained agentic tool-calling and coding.
+     * @notes Reasoning model with vision. $1.50/$7.50 per 1M (cached in $0.15). Cutoff March 2026.
+     */
+    public const string MODEL_GOOGLE_GEMINI_3_6_FLASH = 'GOOGLE.GEMINI_3_6_FLASH';
+
     public const string MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE = 'GOOGLE.GEMINI_2_5_FLASH_LITE';
 
     // ===== Chinese open-weight agentic candidates (served via Western OpenRouter providers) — added 2026-06 =====
