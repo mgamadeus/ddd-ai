@@ -689,6 +689,22 @@ class AIModel extends Entity
                         // Calculate costs for image based on OpenAI's guidelines
                         $detail = $element['detail'] ?? 'auto'; // Assume 'low' detail if not specified
                         $inputTokens += $this->calculateImageTokenCost($photo, $detail);
+                    } elseif (isset($element['role']) && isset($element['content']) && is_array($element['content'])) {
+                        // Agent path: userContent is a {role, content[]} messages array, so image parts are
+                        // NESTED in the message content — the top-level branches above never see them and an
+                        // image-bearing turn is priced at ZERO (plan 64 §2.10). Descend one level and price
+                        // every image part at the MEASURED per-image cost (a large floor that barely scales
+                        // with pixels — plan 64 §1.1; arithmetic on dimensions buys nothing at the small end).
+                        foreach ($element['content'] as $contentPart) {
+                            if (!is_array($contentPart)) {
+                                continue;
+                            }
+                            if (($contentPart['type'] ?? null) === 'text' && isset($contentPart['text'])) {
+                                $userContentString .= $contentPart['text'];
+                            } elseif (($contentPart['type'] ?? null) === 'image_url') {
+                                $inputTokens += $this->getEstimatedImageInputTokens();
+                            }
+                        }
                     }
                 }
             } else {
@@ -729,6 +745,19 @@ class AIModel extends Entity
         }
 
         return (int)$tokenCount;
+    }
+
+    /**
+     * The MEASURED per-image input-token cost for the pre-call budget gate on the agent path, where the image
+     * arrives as a resolved wire part with no Photo/dimensions to feed {@see calculateImageTokenCost()}. A
+     * probe returned 1,158 vs 69 prompt tokens for one 2×2 PNG in a tool result on Gemini 3.5 Flash — ≈1,089
+     * tokens — so the per-image cost has a large floor that barely scales with the picture (plan 64 §1.1);
+     * pricing per-part at this flat measured value beats dimension arithmetic that undercounts at the small end.
+     * Override per model family once each family is probed.
+     */
+    public function getEstimatedImageInputTokens(): int
+    {
+        return 1100;
     }
 
     /**
