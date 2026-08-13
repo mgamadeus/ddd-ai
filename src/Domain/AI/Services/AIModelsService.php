@@ -327,6 +327,11 @@ class AIModelsService extends Service
         // and DeepInfra publishes no cached-input price for Qwen, so the blended metric inverts the true ranking.
         // Until the cost model accounts for cached input, an explicit pin is the honest way to express the decision.
         ModelScope::AGENTIC => AIModel::MODEL_OPENAI_GPT5_6_LUNA,
+        // COMPACTION pinned to Luna on 2026-08-13 (owner decision): the COST-band heuristic selected
+        // Qwen3-235B, which intermittently returns an EMPTY summary — a silent compaction stall (the leaf pass
+        // stops, the range stays uncovered until a later round). Luna is reliable on the summarize shape and its
+        // real per-call cost beats Qwen's under the cached-input reality documented for the AGENTIC pin above.
+        ModelScope::COMPACTION => AIModel::MODEL_OPENAI_GPT5_6_LUNA,
     ];
 
     /**
