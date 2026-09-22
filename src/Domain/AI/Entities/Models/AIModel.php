@@ -86,6 +86,9 @@ class AIModel extends Entity
     /** @var string Model Vendor Z.ai / Zhipu AI / GLM (China; served via Western OpenRouter providers) */
     public const string VENDOR_ZAI = 'ZAI';
 
+    /** @var string Model Vendor TypeSafe AI — System One DECISION models (Jev): typed answers with probabilities, no text */
+    public const string VENDOR_TYPESAFE = 'TYPESAFE';
+
     /**
      * @var string Reasoning effort: none (fastest, minimal thinking)
      * @description Use when you want maximum speed and minimal reasoning.
@@ -455,6 +458,13 @@ class AIModel extends Entity
     public const string MODEL_MOONSHOT_KIMI_K3 = 'MOONSHOT.KIMI_K3';
 
     public const string MODEL_ZAI_GLM_5_2 = 'ZAI.GLM_5_2';
+
+    /**
+     * @var string TypeSafe Jev 1.13 — a System One DECISION model (choice/score/noul with probabilities, never text),
+     * served by OpenRouter's `/api/v1/systemone` route. Pinned to the exact version on purpose: a decision model's
+     * probabilities may drift between versions.
+     */
+    public const string MODEL_TYPESAFE_JEV_1_13 = 'TYPESAFE.JEV_1_13';
 
     /** @var string The type of the Model */
     #[Choice(callback: [self::class, 'getModelTypes'])]

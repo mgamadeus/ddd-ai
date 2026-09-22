@@ -1,9 +1,9 @@
 ---
 name: ddd-module-ai-specialist
-description: Work with AI models, prompts, cost tracking, and Argus AI integration from the ddd-ai module. Use when adding LLM/image/embedding capabilities to entities, managing prompts, or estimating AI costs.
+description: "Work with AI models, prompts, cost tracking and Argus AI integration from the ddd-ai module — the model catalog in config/app/AI/models.php (60+ rows with vendor, externalId/openRouterExternalId, context and price settings, speed and benchmark measurements, agentEligible/agentTier), AIModelsService lookup and scope-based selection, AIPrompt markdown templates with parameter substitution and project overrides, cost estimation per prompt/tokens/image, image generation, embeddings, the batch endpoints, and the trait's Gemini-vs-OpenAI payload auto-detection. Includes decision models (TypeSafe System One), which answer typed questions instead of text and are never agent-eligible. Use when adding LLM, image or embedding capabilities to entities, adding or repricing a model in the catalog, choosing a model for a scope, managing prompts, or estimating AI costs."
 metadata:
   author: mgamadeus
-  version: "1.0.0"
+  version: "1.1.0"
   module: mgamadeus/ddd-ai
 ---
 
@@ -118,7 +118,21 @@ $model->settings->maxInputTokens;  // 1050000
 - `MODEL_GOOGLE_GEMINI_2_5_PRO` -- 1M context, tiered pricing
 - `MODEL_OPENAI_TEXT_EMBEDDING_3_SMALL` -- Embeddings
 
-**Vendors:** `VENDOR_OPENAI`, `VENDOR_GOOGLE`, `VENDOR_META`, `VENDOR_BLACK_FOREST_LABS`, `VENDOR_FALAI`
+**Vendors:** `VENDOR_OPENAI`, `VENDOR_GOOGLE`, `VENDOR_ANTHROPIC`, `VENDOR_XAI`, `VENDOR_META`, `VENDOR_PERPLEXITY`, `VENDOR_BLACK_FOREST_LABS`, `VENDOR_FALAI`, and the Chinese group served through Western OpenRouter providers: `VENDOR_MINIMAX`, `VENDOR_MOONSHOT`, `VENDOR_ALIBABA`, `VENDOR_ZAI` — plus `VENDOR_TYPESAFE` (decision models, below). `AIModel::getModelVendors()` reflects over the `VENDOR_` constants, so a new vendor constant is all the `#[Choice]` validation needs.
+
+### Decision models — a catalog row that is not a chat model
+
+`MODEL_TYPESAFE_JEV_1_13` (TypeSafe "System One") answers TYPED questions — choice (≤ 255 options), score (2–10
+levels), noul (yes/no) — with calibrated probabilities and a confidence, in one parallel pass, and produces **no
+text**. It is reachable only through OpenRouter's `POST /api/v1/systemone` route, so a consuming app overrides the
+payload and response protocol methods of the language-model trait in its own Argus repo; the module only carries the
+catalog row.
+
+Such a row is `TYPE_LANGUAGE` (the settings hydrate as `AILanguageModelSetting`, and that price row is what
+`getEstimatedCostsForTokens()` reads), `agentEligible => false`, and carries **no** `agentTier`, `speed` or
+`benchmarks`: no agentic benchmark constant applies to a decision model, and a null `agenticScore` is never consulted
+while `agentEligible` is false. Going through the catalog is what makes the call a normal AI op — scope and envelope
+enforced, counted against the account's cap, logged per call, and priced from this row.
 
 **Types:** `TYPE_LANGUAGE`, `TYPE_IMAGE`, `TYPE_AUDIO`, `TYPE_EMBEDDINGS`
 

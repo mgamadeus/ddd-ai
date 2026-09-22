@@ -1477,6 +1477,33 @@ return [
             'costsPer1000OuputTokensInUSD' => 0.005,
         ],
     ],
+    AIModel::MODEL_TYPESAFE_JEV_1_13 => [
+        // A DECISION model (TypeSafe "System One", GA early access 2026-09-15): it answers typed questions — choice
+        // (<= 255 options), score (2-10 levels), noul (yes/no) — with probabilities and a confidence, in ONE parallel
+        // pass, and produces NO text. Not a chat model: it is reachable only through OpenRouter's dedicated
+        // `/api/v1/systemone` route (the consuming app's decision Argus repos override the chat payload and response
+        // protocol), so it is never agent-eligible and carries no tier. TYPE_LANGUAGE because the settings hydrate as
+        // AILanguageModelSetting and that price row is what getEstimatedCostsForTokens() reads; no speed/benchmark
+        // rows because no agentic benchmark constant applies to a decision model and agentEligible is false, so the
+        // null agenticScore is never consulted. Measured on our route 2026-09-22: p50 418 ms, p95 707 ms, latency
+        // flat in the number of questions and in state size; $0.042 per 1M input tokens, output free.
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_TYPESAFE,
+        'agentEligible' => false,
+        'externalId' => 'jev-1.13',
+        'openRouterExternalId' => 'typesafe/jev-1.13',
+        'isReasoningModel' => false,
+        'hasVisionCapabilities' => false,
+        'description' => 'TypeSafe Jev 1.13 — System One decision model: typed choice/score/noul answers with calibrated probabilities instead of text; 32k state budget, text only. Used at turn boundaries for decisions such as the reply language. $0.042/1M input, output free.',
+        'settings' => [
+            'maxTokens' => 65536,
+            'maxInputTokens' => 32768,
+            'maxOutputTokens' => 1024,
+            'maxPracticallyUsableInputTokens' => 32768,
+            'costsPer1000InputTokensInUSD' => 0.000042,
+            'costsPer1000OuputTokensInUSD' => 0.0,
+        ],
+    ],
     AIModel::MODEL_MINIMAX_M3 => [
         'speed' => [
             ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 100.0, 'timeToFirstTokenMs' => 900, 'sourceUrl' => 'https://openrouter.ai/minimax/minimax-m3', 'asOf' => '2026-06'],
