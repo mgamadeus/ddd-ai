@@ -1285,7 +1285,13 @@ return [
         ],
     ],
     AIModel::MODEL_OPENAI_GPT5_6_LUNA => [
-        // CHEAP tier + the ADO agent DEFAULT (owner decision 2026-08-12), on our own measurement rather than a
+        // SUPERSEDED 2026-09-24 by MODEL_OPENAI_GPT6_LUNA, which holds the CHEAP slot and the AGENTIC / COMPACTION pins
+        // now. The entry stays (still pinnable via an explicit --model, and every historical eval number in the
+        // evaluation sheet refers to THIS model) but carries no `agentTier`, so tier selection no longer resolves to
+        // it. Prices below were corrected the same day: OpenRouter's `/api/v1/models` now lists this slug at OpenAI's
+        // full rate ($0.20 / $1.20, cached $0.02) — the half-rate default tier recorded in August was promotional.
+        //
+        // Was: CHEAP tier + the ADO agent DEFAULT (owner decision 2026-08-12), on our own measurement rather than a
         // published benchmark: 329-case suite, `--call` 291/329 (88.4%), `--judge` 299/329 (90.9%), both flavors
         // green on 278/329 (84.5%) — and against the same-day baseline run on identical cases, +8 cases net.
         // It sits in CHEAP because it IS the cheapest model we route: $0.0006 per warm turn measured, 6.7x below
@@ -1304,7 +1310,6 @@ return [
         // priority (2x) — plus Azure and Bedrock routes; OpenAI's publicly announced $0.20/$1.20 is the PRIORITY
         // tier, not a different price for the same thing. A downstream on Azure or Bedrock pays that doubled rate
         // and must override these settings.
-        'agentTier' => AIModel::AGENT_TIER_CHEAP,
         // No `speed` datapoint: OpenRouter publishes no endpoint stats for this slug (its stats API returns an empty
         // body) and no verified provider throughput figure was found. Our own measurement — 9.6 s median for a whole
         // agentic turn, 4151 effective tok/s — is NOT provider throughput (it includes tool round-trips and TTFT), so
@@ -1330,8 +1335,97 @@ return [
             'maxInputTokens' => 1050000,
             'maxOutputTokens' => 128000,
             'maxPracticallyUsableInputTokens' => 525000,
+            'costsPer1000InputTokensInUSD' => 0.0002,
+            'costsPer1000OuputTokensInUSD' => 0.0012,
+            'costsPer1000CachedInputTokensInUSD' => 0.00002,
+        ],
+    ],
+    AIModel::MODEL_OPENAI_GPT6_SOL => [
+        // PREMIUM tier — the OpenAI workhorse of the GPT-6 family (released 2026-09-22, nineteen days after GPT-6
+        // Astra): "complex work developers and knowledge workers do repeatedly — building features, reviewing code,
+        // debugging, analysing data". Half the GPT-5.6 Sol price ($4/$20 → $2/$10), permanent, not promotional.
+        // OpenRouter (`/api/v1/models`, checked 2026-09-24) lists exactly OpenAI's rate, all tiers: $2.00 / $10.00,
+        // cached input $0.20; batch half of that.
+        //
+        // BENCHMARK PLACEHOLDER (owner decision 2026-09-24): OpenAI published no AGENTIC_WEIGHTS benchmark for GPT-6
+        // Sol at release (its announcement carries DeepSWE 1.1 68.8, OSWorld 2.0 60.5, AutomationBench 33.2, Agents'
+        // Last Exam 56.4 — none in the weight map, and τ²-bench / BFCL / GAIA / SWE-bench Verified entries did not
+        // exist on 2026-09-24). Without ONE weighted datapoint the model is agent-ineligible (agenticScore null), so
+        // the entry CARRIES OVER GPT-5.6 Sol's Terminal-Bench 2.1 score (88.8, base Sol, OpenAI-published 2026-07)
+        // as a stand-in — OpenAI describes GPT-6 Sol as trained like Astra and strictly ahead of 5.6 Sol, so this
+        // under-states rather than over-states. `official => false` marks it. REPLACE with the real GPT-6 number on
+        // the next catalog pass.
+        'agentTier' => AIModel::AGENT_TIER_PREMIUM,
+        'speed' => [
+            // Artificial Analysis, `max` effort — the TTFT includes the reasoning phase, hence the extreme figure.
+            ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 113.3, 'timeToFirstTokenMs' => 142740, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-6-sol', 'asOf' => '2026-09-24'],
+        ],
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TERMINAL_BENCH, 'score' => 88.8, 'sourceUrl' => 'https://openai.com/index/gpt-5-6/', 'asOf' => '2026-07', 'official' => false],
+        ],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_OPENAI,
+        'externalId' => 'gpt-6-sol',
+        // Agentic: medium is the vendor default (effort levels none / low / medium / high / xhigh / max); the premium
+        // model is chosen for quality, so it keeps the balanced default rather than Luna's `low`.
+        'agenticUseCase' => ['reasoningEffort' => 'medium'],
+        'openRouterExternalId' => 'openai/gpt-6-sol',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'OpenAI GPT-6 Sol (2026-09-22): the workhorse tier of the GPT-6 family for repeated complex work — features, code review, debugging, data analysis. 1.05M context, 128K output. Text+image, reasoning, cutoff Apr 2026.',
+        'settings' => [
+            'maxTokens' => 1178000,
+            'maxInputTokens' => 1050000,
+            'maxOutputTokens' => 128000,
+            'maxPracticallyUsableInputTokens' => 525000,
+            'costsPer1000InputTokensInUSD' => 0.002,
+            'costsPer1000OuputTokensInUSD' => 0.01,
+            'costsPer1000CachedInputTokensInUSD' => 0.0002,
+        ],
+    ],
+    AIModel::MODEL_OPENAI_GPT6_LUNA => [
+        // CHEAP tier + the ADO agent DEFAULT (AGENTIC and COMPACTION pins, owner decision 2026-09-24) — the successor
+        // of GPT-5.6 Luna, released 2026-09-22. Same envelope (1.05M context, 128K output), same reasoning family and
+        // effort levels (none / low / medium / high / xhigh / max), same modalities (text + image in, text out).
+        //
+        // PRICING: OpenRouter (`/api/v1/models`, checked 2026-09-24) lists exactly OpenAI's list price, no tier
+        // split any more: $0.10 in / $0.50 out per 1M, cached input $0.01; batch is half. Against OpenAI's 5.6 Luna
+        // list price that is −50 % input, −58 % output, −50 % cached; against the OpenRouter rate we actually paid
+        // for 5.6 Luna in August ($0.10 / $0.60 / $0.01, then a promotional half rate) it is the same input and cached
+        // price and −17 % output. Our agent load is 99.2 % input at a ~79 % cache-hit rate (see the evaluation
+        // sheet), so the per-turn cost is expected to move little; the measured $/interaction is re-taken by the
+        // suite, not extrapolated.
+        //
+        // BENCHMARK PLACEHOLDER (owner decision 2026-09-24): no AGENTIC_WEIGHTS benchmark exists for GPT-6 Luna at
+        // release (announcement: DeepSWE 1.1 66.6, OSWorld 2.0 58.1, AutomationBench +5.4 pp over 5.6 Luna — none in
+        // the weight map). To keep the model agent-eligible the entry CARRIES OVER GPT-5.6 Luna's Terminal-Bench 2.1
+        // score (84.7, OpenAI-published 2026-07), marked `official => false`. REPLACE with the real GPT-6 number on
+        // the next catalog pass; OpenAI states GPT-6 Luna is ahead of 5.6 Luna on every published axis.
+        'agentTier' => AIModel::AGENT_TIER_CHEAP,
+        'speed' => [
+            // Artificial Analysis, `max` effort — the TTFT includes the reasoning phase; our agentic turns run `low`.
+            ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 131.4, 'timeToFirstTokenMs' => 102820, 'sourceUrl' => 'https://artificialanalysis.ai/models/gpt-6-luna', 'asOf' => '2026-09-24'],
+        ],
+        'benchmarks' => [
+            ['benchmark' => AIModelBenchmarks::BENCHMARK_TERMINAL_BENCH, 'score' => 84.7, 'sourceUrl' => 'https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6/', 'asOf' => '2026-07', 'official' => false],
+        ],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_OPENAI,
+        'externalId' => 'gpt-6-luna',
+        // Agentic: `low`, carried over from 5.6 Luna (same reasoning family, same load_skills→reasoning-only
+        // empty-turn stall class). Re-tune only if an eval shows it under-reasons.
+        'agenticUseCase' => ['reasoningEffort' => 'low'],
+        'openRouterExternalId' => 'openai/gpt-6-luna',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'OpenAI GPT-6 Luna (2026-09-22): the budget tier of the GPT-6 family, successor of 5.6 Luna, for high-volume chat, classification, extraction and lightweight agentic work. 1.05M context, 128K output. Text+image, reasoning, cutoff May 2026.',
+        'settings' => [
+            'maxTokens' => 1178000,
+            'maxInputTokens' => 1050000,
+            'maxOutputTokens' => 128000,
+            'maxPracticallyUsableInputTokens' => 525000,
             'costsPer1000InputTokensInUSD' => 0.0001,
-            'costsPer1000OuputTokensInUSD' => 0.0006,
+            'costsPer1000OuputTokensInUSD' => 0.0005,
             'costsPer1000CachedInputTokensInUSD' => 0.00001,
         ],
     ],

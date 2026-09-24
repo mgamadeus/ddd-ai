@@ -435,6 +435,29 @@ class AIModel extends Entity
      */
     public const string MODEL_OPENAI_GPT5_6_LUNA = 'OPENAI.GPT5_6_LUNA';
 
+    // ===== OpenAI GPT-6 family (Sol / Luna) — added 2026-09 =====
+
+    /**
+     * @var string OpenAI GPT-6 Sol Model
+     * @description Workhorse tier of the GPT-6 family (released 2026-09-22): complex, repeated professional work —
+     *      feature building, code review, debugging, data analysis. Reasoning + vision, 1.05M context, 128K output.
+     * @usage The PREMIUM-tier OpenAI agent model; sustained agentic tool-calling where quality dominates cost.
+     * @notes Reasoning model (effort none…max). $2.00/$10.00 per 1M, cached input $0.20 (OpenRouter = OpenAI list).
+     *      Cutoff 2026-04-20. Half the GPT-5.6 Sol price.
+     */
+    public const string MODEL_OPENAI_GPT6_SOL = 'OPENAI.GPT6_SOL';
+
+    /**
+     * @var string OpenAI GPT-6 Luna Model
+     * @description Budget tier of the GPT-6 family (released 2026-09-22), successor of GPT-5.6 Luna: high-volume chat,
+     *      classification, extraction and agentic tool-calling. Reasoning + vision, 1.05M context, 128K output.
+     * @usage The CHEAP-tier OpenAI agent model and the pinned AGENTIC / COMPACTION default since 2026-09-24.
+     * @notes Reasoning model (effort none…max). $0.10/$0.50 per 1M, cached input $0.01 (OpenRouter = OpenAI list).
+     *      Cutoff 2026-05-18. Same input and cached price as the OpenRouter rate we paid for 5.6 Luna, output −17%;
+     *      against OpenAI's 5.6 list price −50% input, −58% output.
+     */
+    public const string MODEL_OPENAI_GPT6_LUNA = 'OPENAI.GPT6_LUNA';
+
     public const string MODEL_GOOGLE_GEMINI_3_5_FLASH = 'GOOGLE.GEMINI_3_5_FLASH';
 
     /**

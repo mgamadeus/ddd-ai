@@ -3,7 +3,7 @@ name: ddd-module-ai-specialist
 description: "Work with AI models, prompts, cost tracking and Argus AI integration from the ddd-ai module — the model catalog in config/app/AI/models.php (60+ rows with vendor, externalId/openRouterExternalId, context and price settings, speed and benchmark measurements, agentEligible/agentTier), AIModelsService lookup and scope-based selection, AIPrompt markdown templates with parameter substitution and project overrides, cost estimation per prompt/tokens/image, image generation, embeddings, the batch endpoints, and the trait's Gemini-vs-OpenAI payload auto-detection. Includes decision models (TypeSafe System One), which answer typed questions instead of text and are never agent-eligible. Use when adding LLM, image or embedding capabilities to entities, adding or repricing a model in the catalog, choosing a model for a scope, managing prompts, or estimating AI costs."
 metadata:
   author: mgamadeus
-  version: "1.1.0"
+  version: "1.1.1"
   module: mgamadeus/ddd-ai
 ---
 
@@ -110,13 +110,23 @@ $model->hasVisionCapabilities;  // true
 $model->settings->maxInputTokens;  // 1050000
 ```
 
-**Key model constants:**
-- `MODEL_OPENAI_GPT5_4` -- Current flagship, 1M context
-- `MODEL_OPENAI_GPT5_4_MINI` -- Fast, 400K context
-- `MODEL_OPENAI_GPT5_4_NANO` -- Cheapest
-- `MODEL_OPENAI_O3` -- Advanced reasoning
-- `MODEL_GOOGLE_GEMINI_2_5_PRO` -- 1M context, tiered pricing
+**Key model constants** (the catalog is the source of truth — read `config/app/AI/models.php` before quoting a price):
+- `MODEL_OPENAI_GPT6_SOL` -- PREMIUM tier, reasoning + vision, 1.05M context
+- `MODEL_OPENAI_GPT6_LUNA` -- CHEAP tier and the pinned AGENTIC / COMPACTION default
+- `MODEL_OPENAI_GPT5_6_LUNA` -- superseded 2026-09-24, kept without a tier (historical eval numbers refer to it)
+- `MODEL_GOOGLE_GEMINI_3_5_FLASH`, `MODEL_ZAI_GLM_5_2`, `MODEL_MINIMAX_M3` -- other tier/scope picks
+- `MODEL_TYPESAFE_JEV_1_13` -- decision model, see below
 - `MODEL_OPENAI_TEXT_EMBEDDING_3_SMALL` -- Embeddings
+
+**Pinned scope defaults** live in `AIModelsService::SCOPE_PINNED_DEFAULT_MODELS` (`ModelScope::AGENTIC`,
+`COMPACTION`, `ORCHESTRATOR`, …). A pin is an explicit owner decision that overrides the cost/score heuristic —
+change it there, never by repricing a model.
+
+**Benchmarks and agent eligibility:** `getAgentEligibleModels()` keeps only models whose `agenticScore` is not null,
+i.e. that carry at least one benchmark from `AGENTIC_WEIGHTS` (BFCL, τ²-bench, GAIA, SWE-bench Verified, AgentBench,
+Terminal-Bench). A brand-new model without one of those is invisible to tier selection. Never file a non-map
+benchmark under a neighbouring id; if a score has to stand in for a successor model, mark the row `'official' => false`
+and say in the comment what replaces it.
 
 **Vendors:** `VENDOR_OPENAI`, `VENDOR_GOOGLE`, `VENDOR_ANTHROPIC`, `VENDOR_XAI`, `VENDOR_META`, `VENDOR_PERPLEXITY`, `VENDOR_BLACK_FOREST_LABS`, `VENDOR_FALAI`, and the Chinese group served through Western OpenRouter providers: `VENDOR_MINIMAX`, `VENDOR_MOONSHOT`, `VENDOR_ALIBABA`, `VENDOR_ZAI` — plus `VENDOR_TYPESAFE` (decision models, below). `AIModel::getModelVendors()` reflects over the `VENDOR_` constants, so a new vendor constant is all the `#[Choice]` validation needs.
 
