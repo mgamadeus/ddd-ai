@@ -1085,64 +1085,6 @@ return [
     ],
 
     // ===== Added 2026-06: Anthropic + xAI vendors, newest OpenAI/Google =====
-    AIModel::MODEL_ANTHROPIC_CLAUDE_OPUS_4_8 => [
-        'agentTier' => AIModel::AGENT_TIER_PREMIUM,
-        'speed' => [
-            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 3, 'topThroughputProvider' => 'Amazon Bedrock', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 58, 'p75' => 76, 'p90' => 88, 'p99' => 104], 'throughputAvg' => ['p50' => 57.7, 'p75' => 73, 'p90' => 87.3, 'p99' => 107], 'latencyTop' => ['p50' => 1767, 'p75' => 2838, 'p90' => 4211, 'p99' => 7309], 'latencyAvg' => ['p50' => 2612.5, 'p75' => 4002.8, 'p90' => 5483.6, 'p99' => 11184.4], 'sourceUrl' => 'https://openrouter.ai/anthropic/claude-opus-4.8', 'asOf' => '2026-06-17'],
-            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 40.0, 'timeToFirstTokenMs' => 2228, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=anthropic/claude-4.8-opus-20260528&variant=standard', 'asOf' => '2026-06-05'],
-            ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 59.8, 'timeToFirstTokenMs' => 14890, 'sourceUrl' => 'https://artificialanalysis.ai/models/claude-opus-4-8', 'asOf' => '2026-06-05'],
-        ],
-        'benchmarks' => [
-            ['benchmark' => AIModelBenchmarks::BENCHMARK_SWE_BENCH_VERIFIED, 'score' => 88.6, 'sourceUrl' => 'https://www.vellum.ai/blog/claude-opus-4-8-benchmarks-explained', 'asOf' => '2026-06', 'official' => false],
-        ],
-        'type' => AIModel::TYPE_LANGUAGE,
-        'vendor' => AIModel::VENDOR_ANTHROPIC,
-        'externalId' => 'claude-opus-4-8',
-        // Agentic: high effort is Anthropic's default for agent loops/multi-turn (interleaved adaptive thinking).
-        'agenticUseCase' => ['reasoningEffort' => 'high'],
-        'openRouterExternalId' => 'anthropic/claude-opus-4.8',
-        'isReasoningModel' => true,
-        'hasVisionCapabilities' => true,
-        'description' => 'Anthropic flagship: complex reasoning + long-horizon agentic coding. 1M context, 128k output, adaptive thinking. Training cutoff Jan 2026.',
-        'settings' => [
-            'maxTokens' => 1000000,
-            'maxInputTokens' => 1000000,
-            'maxOutputTokens' => 128000,
-            'maxPracticallyUsableInputTokens' => 500000,
-            'costsPer1000InputTokensInUSD' => 0.005,
-            'costsPer1000OuputTokensInUSD' => 0.025,
-            'costsPer1000CachedInputTokensInUSD' => 0.0005,
-        ],
-    ],
-    AIModel::MODEL_ANTHROPIC_CLAUDE_SONNET_4_6 => [
-        'agentTier' => AIModel::AGENT_TIER_PREMIUM,
-        'speed' => [
-            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER_PROVIDERS, 'providerCount' => 3, 'topThroughputProvider' => 'Amazon Bedrock', 'topLatencyProvider' => 'Google', 'throughputTop' => ['p50' => 46, 'p75' => 60, 'p90' => 67, 'p99' => 98], 'throughputAvg' => ['p50' => 42.7, 'p75' => 53.7, 'p90' => 62.7, 'p99' => 93.3], 'latencyTop' => ['p50' => 1193, 'p75' => 1855.5, 'p90' => 2633, 'p99' => 5058.3], 'latencyAvg' => ['p50' => 1343.7, 'p75' => 1858.9, 'p90' => 2611.3, 'p99' => 6322.1], 'sourceUrl' => 'https://openrouter.ai/anthropic/claude-sonnet-4.6', 'asOf' => '2026-06-17'],
-            ['source' => AIModelSpeedMeasurements::SOURCE_OPENROUTER, 'tokensPerSecond' => 37.5, 'timeToFirstTokenMs' => 1691, 'sourceUrl' => 'https://openrouter.ai/api/frontend/stats/endpoint?permaslug=anthropic/claude-4.6-sonnet-20260217&variant=standard', 'asOf' => '2026-06-05'],
-            ['source' => AIModelSpeedMeasurements::SOURCE_ARTIFICIAL_ANALYSIS, 'tokensPerSecond' => 43.9, 'timeToFirstTokenMs' => 1630, 'sourceUrl' => 'https://artificialanalysis.ai/models/claude-sonnet-4-6', 'asOf' => '2026-06-05'],
-        ],
-        'benchmarks' => [
-            ['benchmark' => AIModelBenchmarks::BENCHMARK_SWE_BENCH_VERIFIED, 'score' => 76.3, 'sourceUrl' => 'https://www.anthropic.com/news/claude-sonnet-4-6', 'asOf' => '2026-06'],
-        ],
-        'type' => AIModel::TYPE_LANGUAGE,
-        'vendor' => AIModel::VENDOR_ANTHROPIC,
-        'externalId' => 'claude-sonnet-4-6',
-        // Agentic: medium is Anthropic's recommended default for Sonnet 4.6 tool-heavy/agentic workflows.
-        'agenticUseCase' => ['reasoningEffort' => 'medium'],
-        'openRouterExternalId' => 'anthropic/claude-sonnet-4.6',
-        'isReasoningModel' => true,
-        'hasVisionCapabilities' => true,
-        'description' => 'Best speed/intelligence balance. 1M context, 64k output, extended+adaptive thinking. Training cutoff Jan 2026.',
-        'settings' => [
-            'maxTokens' => 1000000,
-            'maxInputTokens' => 1000000,
-            'maxOutputTokens' => 64000,
-            'maxPracticallyUsableInputTokens' => 500000,
-            'costsPer1000InputTokensInUSD' => 0.003,
-            'costsPer1000OuputTokensInUSD' => 0.015,
-            'costsPer1000CachedInputTokensInUSD' => 0.0003,
-        ],
-    ],
     AIModel::MODEL_ANTHROPIC_CLAUDE_HAIKU_4_5 => [
         'agentTier' => AIModel::AGENT_TIER_STANDARD,
         'speed' => [
@@ -1173,6 +1115,88 @@ return [
             'costsPer1000InputTokensInUSD' => 0.001,
             'costsPer1000OuputTokensInUSD' => 0.005,
             'costsPer1000CachedInputTokensInUSD' => 0.0001,
+        ],
+    ],
+    // ===== Added 2026-09: Anthropic Claude 5 family (replaces Opus 4.8 and Sonnet 4.6, removed in 2.0.0) =====
+    AIModel::MODEL_ANTHROPIC_CLAUDE_OPUS_5_5 => [
+        // Added 2026-09. Prices are Anthropic's list rate, which OpenRouter mirrors (read 2026-09-27) and which
+        // matches Anthropic's published pricing. No `speed` or `benchmarks` rows: neither has been measured for
+        // this model, and an invented number in the catalog is worse than a missing one. Without a benchmark from
+        // AGENTIC_WEIGHTS the agenticScore stays null, so the model is NOT agent-eligible and the `agentTier`
+        // below changes no tier pick until a real measurement lands — which is exactly what was asked for.
+        'agentTier' => AIModel::AGENT_TIER_PREMIUM,
+        'speed' => [],
+        'benchmarks' => [],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_ANTHROPIC,
+        'externalId' => 'claude-opus-5-5',
+        'agenticUseCase' => ['reasoningEffort' => 'high'],
+        'openRouterExternalId' => 'anthropic/claude-opus-5.5',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Anthropic Claude Opus 5.5 (2026-09-22): the Opus tier of the Claude 5 family, for complex reasoning and long-horizon agentic work. 1M context, 128k output. Text+image, reasoning. Successor of Opus 4.8 at half its price.',
+        'settings' => [
+            'maxTokens' => 1000000,
+            'maxInputTokens' => 1000000,
+            'maxOutputTokens' => 128000,
+            'maxPracticallyUsableInputTokens' => 500000,
+            'costsPer1000InputTokensInUSD' => 0.004,
+            'costsPer1000OuputTokensInUSD' => 0.02,
+            'costsPer1000CachedInputTokensInUSD' => 0.0002,
+        ],
+    ],
+    AIModel::MODEL_ANTHROPIC_CLAUDE_SONNET_5 => [
+        // Added 2026-09. Prices are Anthropic's list rate, which OpenRouter mirrors (read 2026-09-27) and which
+        // matches Anthropic's published pricing. No `speed` or `benchmarks` rows: neither has been measured for
+        // this model, and an invented number in the catalog is worse than a missing one. Without a benchmark from
+        // AGENTIC_WEIGHTS the agenticScore stays null, so the model is NOT agent-eligible and the `agentTier`
+        // below changes no tier pick until a real measurement lands — which is exactly what was asked for.
+        'agentTier' => AIModel::AGENT_TIER_PREMIUM,
+        'speed' => [],
+        'benchmarks' => [],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_ANTHROPIC,
+        'externalId' => 'claude-sonnet-5',
+        'agenticUseCase' => ['reasoningEffort' => 'medium'],
+        'openRouterExternalId' => 'anthropic/claude-sonnet-5',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Anthropic Claude Sonnet 5: the Sonnet tier of the Claude 5 family, balancing speed and intelligence. 1M context, 128k output. Text+image, reasoning. Successor of Sonnet 4.6.',
+        'settings' => [
+            'maxTokens' => 1000000,
+            'maxInputTokens' => 1000000,
+            'maxOutputTokens' => 128000,
+            'maxPracticallyUsableInputTokens' => 500000,
+            'costsPer1000InputTokensInUSD' => 0.002,
+            'costsPer1000OuputTokensInUSD' => 0.01,
+            'costsPer1000CachedInputTokensInUSD' => 0.0002,
+        ],
+    ],
+    AIModel::MODEL_ANTHROPIC_CLAUDE_FABLE_5_1 => [
+        // Added 2026-09. Prices are Anthropic's list rate, which OpenRouter mirrors (read 2026-09-27) and which
+        // matches Anthropic's published pricing. No `speed` or `benchmarks` rows: neither has been measured for
+        // this model, and an invented number in the catalog is worse than a missing one. Without a benchmark from
+        // AGENTIC_WEIGHTS the agenticScore stays null, so the model is NOT agent-eligible and the `agentTier`
+        // below changes no tier pick until a real measurement lands — which is exactly what was asked for.
+        'agentTier' => AIModel::AGENT_TIER_PREMIUM,
+        'speed' => [],
+        'benchmarks' => [],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_ANTHROPIC,
+        'externalId' => 'claude-fable-5-1',
+        'agenticUseCase' => ['reasoningEffort' => 'high'],
+        'openRouterExternalId' => 'anthropic/claude-fable-5.1',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Anthropic Claude Fable 5.1: the most capable model of the Claude 5 family, for the most demanding reasoning and long-horizon agentic work. 1M context, 128k output. Text+image, reasoning. The most expensive model in the catalog — pick it deliberately.',
+        'settings' => [
+            'maxTokens' => 1000000,
+            'maxInputTokens' => 1000000,
+            'maxOutputTokens' => 128000,
+            'maxPracticallyUsableInputTokens' => 500000,
+            'costsPer1000InputTokensInUSD' => 0.01,
+            'costsPer1000OuputTokensInUSD' => 0.05,
+            'costsPer1000CachedInputTokensInUSD' => 0.00025,
         ],
     ],
     AIModel::MODEL_XAI_GROK_4_3 => [

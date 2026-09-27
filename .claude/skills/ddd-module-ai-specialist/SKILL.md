@@ -3,7 +3,7 @@ name: ddd-module-ai-specialist
 description: "Work with AI models, prompts, cost tracking and Argus AI integration from the ddd-ai module — the model catalog in config/app/AI/models.php (60+ rows with vendor, externalId/openRouterExternalId, context and price settings, speed and benchmark measurements, agentEligible/agentTier), AIModelsService lookup and scope-based selection, AIPrompt markdown templates with parameter substitution and project overrides, cost estimation per prompt/tokens/image, image generation, embeddings, the batch endpoints, and the trait's Gemini-vs-OpenAI payload auto-detection. Includes decision models (TypeSafe System One), which answer typed questions instead of text and are never agent-eligible. Use when adding LLM, image or embedding capabilities to entities, adding or repricing a model in the catalog, choosing a model for a scope, managing prompts, or estimating AI costs."
 metadata:
   author: mgamadeus
-  version: "1.1.1"
+  version: "1.2.0"
   module: mgamadeus/ddd-ai
 ---
 
@@ -115,12 +115,31 @@ $model->settings->maxInputTokens;  // 1050000
 - `MODEL_OPENAI_GPT6_LUNA` -- CHEAP tier and the pinned AGENTIC / COMPACTION default
 - `MODEL_OPENAI_GPT5_6_LUNA` -- superseded 2026-09-24, kept without a tier (historical eval numbers refer to it)
 - `MODEL_GOOGLE_GEMINI_3_5_FLASH`, `MODEL_ZAI_GLM_5_2`, `MODEL_MINIMAX_M3` -- other tier/scope picks
+- `MODEL_ANTHROPIC_CLAUDE_OPUS_5_5`, `MODEL_ANTHROPIC_CLAUDE_SONNET_5`, `MODEL_ANTHROPIC_CLAUDE_FABLE_5_1` -- the Claude 5 family (2.0.0); Opus 4.8 and Sonnet 4.6 were REMOVED in the same release
 - `MODEL_TYPESAFE_JEV_1_13` -- decision model, see below
 - `MODEL_OPENAI_TEXT_EMBEDDING_3_SMALL` -- Embeddings
 
 **Pinned scope defaults** live in `AIModelsService::SCOPE_PINNED_DEFAULT_MODELS` (`ModelScope::AGENTIC`,
 `COMPACTION`, `ORCHESTRATOR`, …). A pin is an explicit owner decision that overrides the cost/score heuristic —
 change it there, never by repricing a model.
+
+### Retiring a model — a stored name must keep resolving
+
+Model names are PERSISTED by consumers (conversation overrides, messages, compaction nodes, usage logs). Deleting a
+catalog entry therefore breaks every stored row that names it: `getAIModelByName()` returns null, or throws with
+`throwErrors`, and continuing an old conversation or opening an admin view of an old row fails.
+
+So a removal is two edits, not one: drop the constant and the entry, AND add the name to
+`AIModel::RETIRED_MODEL_SUCCESSORS`, which `getAIModelByName()` follows. The resolved model carries
+`$resolvedFromRetiredModelName` (the name that was asked for) — read it before writing any record of what ran, so a
+log of an Opus 4.8 call never claims Opus 5.5 produced it.
+
+What a removal does NOT preserve is the retired model's PRICES. Every cost in this package is computed from a live
+model at call time and persisted as an amount by the consumer; nothing re-prices a stored row. A consumer that ever
+wants to re-derive a historical cost must keep its own record of the rate it paid.
+
+Removing a public constant is a BREAKING change — release it as a major version, and check the consuming apps for
+references first (`grep -rn MODEL_<NAME>`): a removed constant is a fatal error, not a graceful failure.
 
 **Benchmarks and agent eligibility:** `getAgentEligibleModels()` keeps only models whose `agenticScore` is not null,
 i.e. that carry at least one benchmark from `AGENTIC_WEIGHTS` (BFCL, τ²-bench, GAIA, SWE-bench Verified, AgentBench,

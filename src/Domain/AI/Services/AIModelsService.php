@@ -266,7 +266,19 @@ class AIModelsService extends Service
     {
         $configs = Config::get('AI.models');
         $aiModelConfig = $configs[$aiModelName] ?? null;
+        // A name that left the catalog resolves to its successor, so a stored row (a conversation's model override,
+        // a message, a usage log) stays readable after a model is retired. The result is MARKED — see
+        // AIModel::$resolvedFromRetiredModelName — so a record of what ran keeps naming the model that ran.
+        $retiredModelName = null;
+        if (!$aiModelConfig && isset(AIModel::RETIRED_MODEL_SUCCESSORS[$aiModelName])) {
+            $retiredModelName = $aiModelName;
+            $aiModelName = AIModel::RETIRED_MODEL_SUCCESSORS[$aiModelName];
+            $aiModelConfig = $configs[$aiModelName] ?? null;
+        }
         $aiModel = $aiModelConfig ? $this->createAIModelFromConfig($aiModelName, $aiModelConfig) : null;
+        if ($aiModel && $retiredModelName !== null) {
+            $aiModel->resolvedFromRetiredModelName = $retiredModelName;
+        }
 
         if ($this->throwErrors && !$aiModel) {
             throw new NotFoundException('AiModel not found');

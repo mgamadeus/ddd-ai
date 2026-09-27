@@ -27,6 +27,7 @@ use DDD\Infrastructure\Validation\Constraints\Choice;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
+use DDD\Infrastructure\Traits\Serializer\Attributes\HideProperty;
 use Psr\Cache\InvalidArgumentException;
 use ReflectionClassConstant;
 use ReflectionException;
@@ -407,11 +408,58 @@ class AIModel extends Entity
     public const string MODEL_PERPLEXITY_SONAR = 'PERPLEXITY.SONAR';
 
     // ===== Anthropic (Claude 4.x) — added 2026-06 =====
-    public const string MODEL_ANTHROPIC_CLAUDE_OPUS_4_8 = 'ANTHROPIC.CLAUDE_OPUS_4_8';
-
-    public const string MODEL_ANTHROPIC_CLAUDE_SONNET_4_6 = 'ANTHROPIC.CLAUDE_SONNET_4_6';
-
+    // Opus 4.8 and Sonnet 4.6 were REMOVED in 2.0.0, replaced by Opus 5.5 and Sonnet 5 below. A stored name of
+    // either still resolves — see self::RETIRED_MODEL_SUCCESSORS.
     public const string MODEL_ANTHROPIC_CLAUDE_HAIKU_4_5 = 'ANTHROPIC.CLAUDE_HAIKU_4_5';
+
+    // ===== Anthropic (Claude 5 family) — added 2026-09 =====
+
+    /**
+     * @var string Anthropic Claude Opus 5.5
+     * @description Opus tier of the Claude 5 family (released 2026-09-22): complex reasoning and long-horizon
+     *      agentic work. Reasoning + vision, 1M context, 128K output.
+     * @usage The Anthropic PREMIUM-tier model; successor of Opus 4.8, which stays in the catalog.
+     * @notes $4.00/$20.00 per 1M, cached input read $0.20 — half the Opus 4.8 rate.
+     */
+    public const string MODEL_ANTHROPIC_CLAUDE_OPUS_5_5 = 'ANTHROPIC.CLAUDE_OPUS_5_5';
+
+    /**
+     * @var string Anthropic Claude Sonnet 5
+     * @description Sonnet tier of the Claude 5 family: the balance of speed and intelligence. Reasoning + vision,
+     *      1M context, 128K output.
+     * @usage Successor of Sonnet 4.6, which stays in the catalog.
+     * @notes $2.00/$10.00 per 1M, cached input read $0.20.
+     */
+    public const string MODEL_ANTHROPIC_CLAUDE_SONNET_5 = 'ANTHROPIC.CLAUDE_SONNET_5';
+
+    /**
+     * @var string Anthropic Claude Fable 5.1
+     * @description The most capable model of the Claude 5 family, for the most demanding reasoning and
+     *      long-horizon agentic work. Reasoning + vision, 1M context, 128K output.
+     * @notes $10.00/$50.00 per 1M, cached input read $0.25 — the most expensive model in the catalog; pick it
+     *      deliberately, not as a default.
+     */
+    public const string MODEL_ANTHROPIC_CLAUDE_FABLE_5_1 = 'ANTHROPIC.CLAUDE_FABLE_5_1';
+
+    /**
+     * @var array A model name that LEFT the catalog, mapped to the successor its stored occurrences resolve to.
+     *
+     * Model names are persisted — in conversations, messages, compaction nodes, usage logs. Removing a model from
+     * the catalog would make every stored row unresolvable ({@see \DDD\Domain\AI\Services\AIModelsService::getAIModelByName()}
+     * returns null, or throws with throwErrors), so continuing an old conversation or opening an admin view of an
+     * old row would fail. The resolution follows this map instead, and marks the result: the returned model carries
+     * {@see self::$resolvedFromRetiredModelName}, so a record of what ran can still say WHICH model ran and never
+     * claims the successor did.
+     *
+     * COSTS are not re-derived from this map. Every cost in this package is computed from a LIVE model at call
+     * time and persisted as an amount by the consumer; nothing re-prices a stored row. A retired model's prices
+     * are therefore gone with its entry — if a consumer ever needs to re-price history, it must keep its own
+     * record of the rate it paid, not read today's catalog.
+     */
+    public const array RETIRED_MODEL_SUCCESSORS = [
+        'ANTHROPIC.CLAUDE_OPUS_4_8' => self::MODEL_ANTHROPIC_CLAUDE_OPUS_5_5,
+        'ANTHROPIC.CLAUDE_SONNET_4_6' => self::MODEL_ANTHROPIC_CLAUDE_SONNET_5,
+    ];
 
     // ===== xAI (Grok) — added 2026-06 =====
     public const string MODEL_XAI_GROK_4_3 = 'XAI.GROK_4_3';
@@ -496,6 +544,14 @@ class AIModel extends Entity
     /** @var string The vendor of the Model */
     #[Choice(callback: [self::class, 'getModelVendors'])]
     public string $vendor;
+
+    /**
+     * @var string|null Set when this model was reached through a RETIRED name ({@see self::RETIRED_MODEL_SUCCESSORS}):
+     * it holds the retired name that was asked for. Null on every normal lookup. Read it before writing a record of
+     * what ran — the object describes the SUCCESSOR, not the model that produced the stored row.
+     */
+    #[HideProperty]
+    public ?string $resolvedFromRetiredModelName = null;
 
     /** @var string The name of the Model */
     #[DatabaseIndex(indexType: DatabaseIndex::TYPE_UNIQUE)]
