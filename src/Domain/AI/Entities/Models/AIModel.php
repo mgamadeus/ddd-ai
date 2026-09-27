@@ -418,7 +418,8 @@ class AIModel extends Entity
      * @var string Anthropic Claude Opus 5.5
      * @description Opus tier of the Claude 5 family (released 2026-09-22): complex reasoning and long-horizon
      *      agentic work. Reasoning + vision, 1M context, 128K output.
-     * @usage The Anthropic PREMIUM-tier model; successor of Opus 4.8, which stays in the catalog.
+     * @usage The Anthropic PREMIUM-tier model. Replaces Opus 4.8, which was REMOVED in 2.0.0 — a stored
+     *      'ANTHROPIC.CLAUDE_OPUS_4_8' resolves here via {@see self::RETIRED_MODEL_SUCCESSORS}.
      * @notes $4.00/$20.00 per 1M, cached input read $0.20 — half the Opus 4.8 rate.
      */
     public const string MODEL_ANTHROPIC_CLAUDE_OPUS_5_5 = 'ANTHROPIC.CLAUDE_OPUS_5_5';
@@ -427,7 +428,8 @@ class AIModel extends Entity
      * @var string Anthropic Claude Sonnet 5
      * @description Sonnet tier of the Claude 5 family: the balance of speed and intelligence. Reasoning + vision,
      *      1M context, 128K output.
-     * @usage Successor of Sonnet 4.6, which stays in the catalog.
+     * @usage Replaces Sonnet 4.6, which was REMOVED in 2.0.0 — a stored 'ANTHROPIC.CLAUDE_SONNET_4_6'
+     *      resolves here via {@see self::RETIRED_MODEL_SUCCESSORS}.
      * @notes $2.00/$10.00 per 1M, cached input read $0.20.
      */
     public const string MODEL_ANTHROPIC_CLAUDE_SONNET_5 = 'ANTHROPIC.CLAUDE_SONNET_5';
