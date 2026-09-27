@@ -3,7 +3,7 @@ name: ddd-module-ai-specialist
 description: "Work with AI models, prompts, cost tracking and Argus AI integration from the ddd-ai module — the model catalog in config/app/AI/models.php (60+ rows with vendor, externalId/openRouterExternalId, context and price settings, speed and benchmark measurements, agentEligible/agentTier), AIModelsService lookup and scope-based selection, AIPrompt markdown templates with parameter substitution and project overrides, cost estimation per prompt/tokens/image, image generation, embeddings, the batch endpoints, and the trait's Gemini-vs-OpenAI payload auto-detection. Includes decision models (TypeSafe System One), which answer typed questions instead of text and are never agent-eligible. Use when adding LLM, image or embedding capabilities to entities, adding or repricing a model in the catalog, choosing a model for a scope, managing prompts, or estimating AI costs."
 metadata:
   author: mgamadeus
-  version: "1.2.0"
+  version: "1.3.0"
   module: mgamadeus/ddd-ai
 ---
 
@@ -122,6 +122,18 @@ $model->settings->maxInputTokens;  // 1050000
 **Pinned scope defaults** live in `AIModelsService::SCOPE_PINNED_DEFAULT_MODELS` (`ModelScope::AGENTIC`,
 `COMPACTION`, `ORCHESTRATOR`, …). A pin is an explicit owner decision that overrides the cost/score heuristic —
 change it there, never by repricing a model.
+
+### A time-limited price gets a dated TEST, not a comment
+
+Vendors ship introductory pricing that expires (Gemini 3.x Flash: half price through 2026-12-31, then double).
+The catalog books what is charged TODAY — booking tomorrow's list price over-books every call until then. But a
+comment saying "update this on 2027-01-01" is a reminder nobody receives: the day passes and the catalog silently
+under-books by half.
+
+So pair the introductory price with a test that fails on the date (`GeminiFlashCatalogTest::testTheGeminiIntroductoryPriceWindowHasNotClosed()`):
+it passes while the window is open, and from the deadline it fails with a message naming the model, the key, the
+list price to set, and the reminder to re-check the vendor's page in case the window was extended. The deadline
+becomes a red test at exactly the right moment instead of a wrong number nobody looks at.
 
 ### Retiring a model — a stored name must keep resolving
 

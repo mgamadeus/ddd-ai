@@ -519,6 +519,17 @@ class AIModel extends Entity
      */
     public const string MODEL_GOOGLE_GEMINI_3_6_FLASH = 'GOOGLE.GEMINI_3_6_FLASH';
 
+    /**
+     * @var string Google Gemini 3.8 Flash Model
+     * @description The newest Flash model (GA 2026-09-02), successor of 3.7 Flash. Search grounding, function
+     *      calling, structured outputs, thinking low/medium/high (NOT minimal). Multimodal in (text, image, video,
+     *      audio, PDF), text out. 1M context, 64K output.
+     * @notes INTRODUCTORY price $0.75/$3.75 per 1M (cached $0.075) through 2026-12-31; $1.50/$7.50 (cached $0.15)
+     *      from 2027-01-01 — the catalog books what is charged TODAY, and a dated test fails when the window ends.
+     *      Search grounding is billed separately per query the model runs ($14 per 1,000).
+     */
+    public const string MODEL_GOOGLE_GEMINI_3_8_FLASH = 'GOOGLE.GEMINI_3_8_FLASH';
+
     public const string MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE = 'GOOGLE.GEMINI_2_5_FLASH_LITE';
 
     // ===== Chinese open-weight agentic candidates (served via Western OpenRouter providers) — added 2026-06 =====

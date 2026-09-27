@@ -975,6 +975,9 @@ return [
             'maxPracticallyUsableInputTokens' => 524288,
             'costsPer1000InputTokensInUSD' => 0.0005,
             'costsPer1000OuputTokensInUSD' => 0.003,
+            // Added 2026-09-28: Google lists cached input at $0.05/1M for this model; the entry carried
+            // no cached price, so a cached read was booked at the full input rate.
+            'costsPer1000CachedInputTokensInUSD' => 0.00005,
         ],
     ],
 
@@ -1041,8 +1044,10 @@ return [
         ],
         'type' => AIModel::TYPE_LANGUAGE,
         'vendor' => AIModel::VENDOR_GOOGLE,
-        'externalId' => 'gemini-3.1-flash-lite-preview',
-        'openRouterExternalId' => 'google/gemini-3.1-flash-lite-preview',
+        // The preview was shut down 2026-05-25 (https://ai.google.dev/gemini-api/docs/deprecations); the GA
+        // ids replace it at unchanged prices. Calls with the preview id fail.
+        'externalId' => 'gemini-3.1-flash-lite',
+        'openRouterExternalId' => 'google/gemini-3.1-flash-lite',
         'isReasoningModel' => true,
         'hasVisionCapabilities' => true,
         'description' => 'Google Gemini 3.1 Flash Lite Preview — extended thinking / CoT. Multimodal in, text out. 1M context. Released 2026-03-03.',
@@ -1537,9 +1542,43 @@ return [
             'maxInputTokens' => 1048576,
             'maxOutputTokens' => 65536,
             'maxPracticallyUsableInputTokens' => 524288,
-            'costsPer1000InputTokensInUSD' => 0.0015,
-            'costsPer1000OuputTokensInUSD' => 0.0075,
-            'costsPer1000CachedInputTokensInUSD' => 0.00015,
+            // Corrected 2026-09-28: these were the 2027 LIST prices, booked while Google charges the
+            // introductory rate — every 3.6 Flash call was booked at double. Introductory through 2026-12-31;
+            // from 2027-01-01 it is 0.0015 / 0.0075 / 0.00015 again (the dated test fails then).
+            'costsPer1000InputTokensInUSD' => 0.00075,
+            'costsPer1000OuputTokensInUSD' => 0.00375,
+            'costsPer1000CachedInputTokensInUSD' => 0.000075,
+        ],
+    ],
+    AIModel::MODEL_GOOGLE_GEMINI_3_8_FLASH => [
+        // GA 2026-09-02, the newest Flash model (https://ai.google.dev/gemini-api/docs/changelog, read 2026-09-28).
+        // No agentTier and no agenticUseCase on purpose: this entry exists so the web search and the Argus loaders
+        // can NAME the model; no tier pick, pin or agent default changes with it. Add both when a measurement says so.
+        //
+        // PRICES ARE INTRODUCTORY and expire: $0.75 / $3.75 per 1M, cached $0.075 — through 2026-12-31. From
+        // 2027-01-01 Google charges 0.0015 / 0.0075 / 0.00015 per 1,000 tokens (double). The catalog books what is
+        // charged TODAY; GeminiIntroductoryPriceTest fails once the window closes, so the switch is a
+        // failing test and not a silent under-booking.
+        // Search grounding is NOT in these token prices: $14 per 1,000 queries the model runs, after 5,000 free
+        // per month shared across Gemini 3.x (https://ai.google.dev/gemini-api/docs/google-search).
+        'speed' => [],
+        'benchmarks' => [],
+        'type' => AIModel::TYPE_LANGUAGE,
+        'vendor' => AIModel::VENDOR_GOOGLE,
+        'externalId' => 'gemini-3.8-flash',
+        'openRouterExternalId' => 'google/gemini-3.8-flash',
+        'isReasoningModel' => true,
+        'hasVisionCapabilities' => true,
+        'description' => 'Gemini 3.8 Flash (GA 2026-09-02): the newest Flash model, successor of 3.7 Flash. Search grounding, function calling, structured outputs, thinking low/medium/high. Multimodal in, text out. 1M context, 64K output.',
+        'settings' => [
+            'maxTokens' => 1114112,
+            'maxInputTokens' => 1048576,
+            'maxOutputTokens' => 65536,
+            'maxPracticallyUsableInputTokens' => 524288,
+            'costsPer1000InputTokensInUSD' => 0.00075,
+            'costsPer1000OuputTokensInUSD' => 0.00375,
+            'costsPer1000CachedInputTokensInUSD' => 0.000075,
+            'costsPerWebSearchCallInUSD' => 0.014,
         ],
     ],
     AIModel::MODEL_GOOGLE_GEMINI_2_5_FLASH_LITE => [
