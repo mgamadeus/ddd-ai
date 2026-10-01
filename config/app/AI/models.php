@@ -1447,6 +1447,11 @@ return [
         'openRouterExternalId' => 'openai/gpt-6-luna',
         'isReasoningModel' => true,
         'hasVisionCapabilities' => true,
+        // FAST MODE (verified 2026-10-01 through OpenRouter's OpenAI route): `service_tier: "priority"` is passed
+        // through and echoed back as served; prompt cost 1.8e-6 vs 9e-7 USD on the default tier for the same nine
+        // input tokens → 2×. Flag another model only after the same one-request check, never by family analogy.
+        'supportsFastMode' => true,
+        'fastModePriceMultiplier' => 2.0,
         'description' => 'OpenAI GPT-6 Luna (2026-09-22): the budget tier of the GPT-6 family, successor of 5.6 Luna, for high-volume chat, classification, extraction and lightweight agentic work. 1.05M context, 128K output. Text+image, reasoning, cutoff May 2026.',
         'settings' => [
             'maxTokens' => 1178000,

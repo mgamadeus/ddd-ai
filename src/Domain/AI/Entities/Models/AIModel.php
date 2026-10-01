@@ -595,6 +595,21 @@ class AIModel extends Entity
      */
     public bool $supportsNativeToolCalling = true;
 
+    /**
+     * @var bool If true, the provider offers a FAST (priority-processing) service tier for this model and the egress
+     *      may request it per call — OpenAI's `service_tier: "priority"` (OpenRouter passes it through and echoes the
+     *      tier served; verified 2026-10-01 for GPT-6 Luna). A caller asks for it per conversation purpose; the
+     *      request carries the tier only when this flag is true. Default false: no tier field is sent.
+     */
+    public bool $supportsFastMode = false;
+
+    /**
+     * @var float|null The price factor of the fast tier against the catalog price (OpenAI priority = 2.0 — measured
+     *      on the same prompt: $1.8e-6 priority vs $9e-7 default for 9 input tokens). Applied to the ESTIMATED cost
+     *      of a call sent in fast mode when the provider reports no cost of its own. Null = the catalog price.
+     */
+    public ?float $fastModePriceMultiplier = null;
+
     /** @var string Cheapest agentic tier — high-volume / simple tool-use. */
     public const string AGENT_TIER_CHEAP = 'CHEAP';
 

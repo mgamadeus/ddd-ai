@@ -73,6 +73,10 @@ class AIModelsService extends Service
         $aiModel->isReasoningModel = (bool)($modelConfig['isReasoningModel'] ?? false);
         $aiModel->hasVisionCapabilities = (bool)($modelConfig['hasVisionCapabilities'] ?? false);
         $aiModel->supportsNativeToolCalling = (bool)($modelConfig['supportsNativeToolCalling'] ?? true);
+        $aiModel->supportsFastMode = (bool)($modelConfig['supportsFastMode'] ?? false);
+        $aiModel->fastModePriceMultiplier = isset($modelConfig['fastModePriceMultiplier'])
+            ? (float)$modelConfig['fastModePriceMultiplier']
+            : null;
         $aiModel->agentTier = isset($modelConfig['agentTier']) ? (string)$modelConfig['agentTier'] : null;
         $aiModel->agentEligible = (bool)($modelConfig['agentEligible'] ?? true);
         // Context window: explicit override, else the model's own settings.maxInputTokens / maxTokens (every language

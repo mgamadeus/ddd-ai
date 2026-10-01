@@ -1,6 +1,6 @@
 ---
 name: ddd-module-ai-specialist
-description: "Work with AI models, prompts, cost tracking and Argus AI integration from the ddd-ai module — the model catalog in config/app/AI/models.php (60+ rows with vendor, externalId/openRouterExternalId, context and price settings, speed and benchmark measurements, agentEligible/agentTier), AIModelsService lookup and scope-based selection, AIPrompt markdown templates with parameter substitution and project overrides, cost estimation per prompt/tokens/image, image generation, embeddings, the batch endpoints, and the trait's Gemini-vs-OpenAI payload auto-detection. Includes decision models (TypeSafe System One), which answer typed questions instead of text and are never agent-eligible. Use when adding LLM, image or embedding capabilities to entities, adding or repricing a model in the catalog, choosing a model for a scope, managing prompts, or estimating AI costs."
+description: "Work with AI models, prompts, cost tracking and Argus AI integration from the ddd-ai module — the model catalog in config/app/AI/models.php (60+ rows with vendor, externalId/openRouterExternalId, context and price settings, speed and benchmark measurements, agentEligible/agentTier, the fast/priority service tier via supportsFastMode), AIModelsService lookup and scope-based selection, AIPrompt markdown templates with parameter substitution and project overrides, cost estimation per prompt/tokens/image, image generation, embeddings, the batch endpoints, and the trait's Gemini-vs-OpenAI payload auto-detection. Includes decision models (TypeSafe System One), which answer typed questions instead of text and are never agent-eligible. Use when adding LLM, image or embedding capabilities to entities, adding or repricing a model in the catalog, choosing a model for a scope, managing prompts, or estimating AI costs."
 metadata:
   author: mgamadeus
   version: "1.3.0"
@@ -134,6 +134,17 @@ So pair the introductory price with a test that fails on the date (`GeminiFlashC
 it passes while the window is open, and from the deadline it fails with a message naming the model, the key, the
 list price to set, and the reminder to re-check the vendor's page in case the window was extended. The deadline
 becomes a red test at exactly the right moment instead of a wrong number nobody looks at.
+
+### Fast mode — a per-model service tier, flagged only after a verified request
+
+Some providers serve the same model on a faster, dearer tier (OpenAI's `service_tier: "priority"`, passed through
+and echoed by OpenRouter). Whether the tier exists and what it costs is catalog knowledge:
+`'supportsFastMode' => true` plus `'fastModePriceMultiplier' => 2.0` on the row, hydrated onto
+`AIModel::$supportsFastMode` / `$fastModePriceMultiplier`. The egress sends the tier only when the SELECTED model's
+flag is true, and multiplies an ESTIMATED cost by the factor when the provider reported no cost of its own.
+
+Flag a model only after one request with the tier set, reading the echoed tier and the cost — never by family
+analogy (GPT-6 Luna is verified; GPT-6 Sol is not, and keeps the default). `FastModeCatalogTest` pins both cases.
 
 ### Retiring a model — a stored name must keep resolving
 
