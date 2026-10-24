@@ -38,7 +38,7 @@ class ArgusLanguageModel
     public ?float $temperature = null;
 
     /** @var string|null The desired response Format */
-    #[Choice([
+    #[Choice(choices: [
             self::RESPONSE_FORMAT_JSON_OBJECT,
             self::RESPONSE_FORMAT_DEFAULT,
         ]
