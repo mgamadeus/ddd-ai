@@ -4,7 +4,9 @@ declare (strict_types=1);
 
 namespace DDD\Domain\AI\Entities\Models\Settings;
 
+use DDD\Domain\AI\Entities\Models\AIModel;
 use DDD\Domain\Common\Entities\Money\MoneyAmount;
+use DDD\Infrastructure\Validation\Constraints\Choice;
 
 class AILanguageModelSetting extends AIModelSetting
 {
@@ -38,6 +40,28 @@ class AILanguageModelSetting extends AIModelSetting
 
     /** @var MoneyAmount|null Costs per 1K cached input tokens (prompt-prefix cache discount) */
     public ?MoneyAmount $costsPer1000KCachedInputTokens = null;
+
+    /**
+     * How the provider's prompt cache is addressed for this model — what a request may carry:
+     * - {@see AIModel::PROMPT_CACHE_MODE_EXPLICIT_BREAKPOINTS}: OpenAI GPT-5.6+ `prompt_cache_breakpoint` markers on
+     *   content parts (plus `prompt_cache_key`)
+     * - {@see AIModel::PROMPT_CACHE_MODE_AUTOMATIC_PREFIX}: automatic prefix caching, nothing to send
+     * - {@see AIModel::PROMPT_CACHE_MODE_ANTHROPIC_CACHE_CONTROL}: Anthropic `cache_control` markers
+     * - null / {@see AIModel::PROMPT_CACHE_MODE_NONE}: no prompt cache the caller can steer — send no cache fields
+     */
+    #[Choice(choices: [
+        AIModel::PROMPT_CACHE_MODE_EXPLICIT_BREAKPOINTS,
+        AIModel::PROMPT_CACHE_MODE_AUTOMATIC_PREFIX,
+        AIModel::PROMPT_CACHE_MODE_ANTHROPIC_CACHE_CONTROL,
+        AIModel::PROMPT_CACHE_MODE_NONE,
+    ])]
+    public ?string $promptCacheMode = null;
+
+    /**
+     * The price of a prompt-cache WRITE per write lifetime, as a multiple of the (uncached) input rate; null when
+     * writes cost the plain input rate.
+     */
+    public ?PromptCacheWritePrices $promptCacheWritePrices = null;
 
     /** @var MoneyAmount|null Flat fee per web search tool invocation */
     public ?MoneyAmount $costsPerWebSearchCall = null;

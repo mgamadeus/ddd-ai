@@ -610,6 +610,24 @@ class AIModel extends Entity
      */
     public ?float $fastModePriceMultiplier = null;
 
+    /** @var string OpenAI GPT-5.6+ style: explicit `prompt_cache_breakpoint` markers on content parts */
+    public const string PROMPT_CACHE_MODE_EXPLICIT_BREAKPOINTS = 'explicitBreakpoints';
+
+    /** @var string Automatic prefix caching: the request carries no cache fields */
+    public const string PROMPT_CACHE_MODE_AUTOMATIC_PREFIX = 'automaticPrefix';
+
+    /** @var string Anthropic `cache_control` markers */
+    public const string PROMPT_CACHE_MODE_ANTHROPIC_CACHE_CONTROL = 'anthropicCacheControl';
+
+    /** @var string No prompt cache the caller can steer: send no cache fields */
+    public const string PROMPT_CACHE_MODE_NONE = 'none';
+
+    /** @var string A prompt-cache write with the provider's default lifetime (30 min on OpenAI) */
+    public const string PROMPT_CACHE_WRITE_TTL_DEFAULT = 'default';
+
+    /** @var string A prompt-cache write with the 12 h lifetime (`prompt_cache_breakpoint.ttl = 12h`) */
+    public const string PROMPT_CACHE_WRITE_TTL_TWELVE_HOURS = '12h';
+
     /** @var string Cheapest agentic tier — high-volume / simple tool-use. */
     public const string AGENT_TIER_CHEAP = 'CHEAP';
 
@@ -886,6 +904,30 @@ class AIModel extends Entity
         return 1100;
     }
 
+    /** The catalog's prompt-cache mode for this model; {@see self::PROMPT_CACHE_MODE_NONE} when it declares none. */
+    public function getPromptCacheMode(): string
+    {
+        $settings = $this->settings;
+        $promptCacheMode = $settings instanceof AILanguageModelSetting ? $settings->promptCacheMode : null;
+        return $promptCacheMode ?? self::PROMPT_CACHE_MODE_NONE;
+    }
+
+    /** Whether a request for this model may carry explicit `prompt_cache_breakpoint` markers. */
+    public function usesExplicitPromptCacheBreakpoints(): bool
+    {
+        return $this->getPromptCacheMode() === self::PROMPT_CACHE_MODE_EXPLICIT_BREAKPOINTS;
+    }
+
+    /** The write price multiple for $writeTtl; null when the catalog declares none (= the plain input rate). */
+    public function getPromptCacheWritePriceMultiplier(string $writeTtl = self::PROMPT_CACHE_WRITE_TTL_DEFAULT): ?float
+    {
+        $settings = $this->settings;
+        if (!($settings instanceof AILanguageModelSetting) || $settings->promptCacheWritePrices === null) {
+            return null;
+        }
+        return $settings->promptCacheWritePrices->getPriceMultiplierForTtl($writeTtl);
+    }
+
     /**
      * Calculates and returns estimated costs for given in and output token count.
      *
@@ -896,12 +938,16 @@ class AIModel extends Entity
      * When $cachedInputTokens > 0 and the model has a cached rate configured,
      * the input cost is split: cached tokens at the reduced rate, remaining at full rate.
      * The $webSearchCallCount fee is added on top when the model has a web search fee.
+     * $cacheWriteTokens are part of the uncached tokens and cost the input rate times the model's write multiple for
+     * $cacheWriteTtl ({@see getPromptCacheWritePriceMultiplier()}; the plain rate when it declares none).
      *
      * @param int $promptTokens Total prompt tokens (including any cached portion)
      * @param int $outputTokens Completion tokens
      * @param string|null $pricingVariant Optional pricing variant key (e.g. 'search_context_size.medium')
      * @param int $cachedInputTokens Tokens served from prompt cache (default 0)
      * @param int $webSearchCallCount Number of web_search_call tool invocations (default 0)
+     * @param int $cacheWriteTokens Uncached tokens written to the prompt cache (default 0)
+     * @param string $cacheWriteTtl The lifetime of those writes (default {@see self::PROMPT_CACHE_WRITE_TTL_DEFAULT})
      * @return MoneyAmount|null Estimated cost, or null when rates are not configured
      */
     public function getEstimatedCostsForTokens(
@@ -910,6 +956,8 @@ class AIModel extends Entity
         ?string $pricingVariant = null,
         int $cachedInputTokens = 0,
         int $webSearchCallCount = 0,
+        int $cacheWriteTokens = 0,
+        string $cacheWriteTtl = self::PROMPT_CACHE_WRITE_TTL_DEFAULT,
     ): ?MoneyAmount {
         $amount = $this->calculateEstimatedCostAmount(
             $promptTokens,
@@ -917,6 +965,8 @@ class AIModel extends Entity
             $pricingVariant,
             $cachedInputTokens,
             $webSearchCallCount,
+            $cacheWriteTokens,
+            $cacheWriteTtl,
         );
         if ($amount === null) {
             return null;
@@ -936,6 +986,8 @@ class AIModel extends Entity
      * @param string|null $pricingVariant Optional pricing variant key
      * @param int $cachedInputTokens Tokens served from prompt cache (default 0)
      * @param int $webSearchCallCount Number of web_search_call tool invocations (default 0)
+     * @param int $cacheWriteTokens Uncached tokens written to the prompt cache (default 0)
+     * @param string $cacheWriteTtl The lifetime of those writes
      * @return float|null Estimated cost in USD, or null when rates are not configured
      */
     public function calculateEstimatedCostAmount(
@@ -944,6 +996,8 @@ class AIModel extends Entity
         ?string $pricingVariant = null,
         int $cachedInputTokens = 0,
         int $webSearchCallCount = 0,
+        int $cacheWriteTokens = 0,
+        string $cacheWriteTtl = self::PROMPT_CACHE_WRITE_TTL_DEFAULT,
     ): ?float {
         $settings = $this->settings;
 
@@ -975,7 +1029,9 @@ class AIModel extends Entity
                 ? $settings->costsPer1000OutputTokensAboveThreshold->amount
                 : $settings->costsPer1000KOutputTokens->amount;
 
-            $inputCost = $this->calculateInputCost($settings, $promptTokens, $cachedInputTokens, $fullInputRate);
+            $inputCost = $this->calculateInputCost(
+                $settings, $promptTokens, $cachedInputTokens, $fullInputRate, $cacheWriteTokens, $cacheWriteTtl
+            );
             $totalCosts = $inputCost + ($outputTokens / 1000) * $outputRate;
             $totalCosts += $this->getVariantFeeAmount($settings, $pricingVariant);
             $totalCosts += $this->getWebSearchFeeAmount($settings, $webSearchCallCount);
@@ -987,7 +1043,9 @@ class AIModel extends Entity
         }
 
         $fullInputRate = $settings->costsPer1000KInputTokens->amount;
-        $inputCost = $this->calculateInputCost($settings, $promptTokens, $cachedInputTokens, $fullInputRate);
+        $inputCost = $this->calculateInputCost(
+            $settings, $promptTokens, $cachedInputTokens, $fullInputRate, $cacheWriteTokens, $cacheWriteTtl
+        );
         $totalCosts = $inputCost + ($outputTokens / 1000) * $settings->costsPer1000KOutputTokens->amount;
         $totalCosts += $this->getVariantFeeAmount($settings, $pricingVariant);
         $totalCosts += $this->getWebSearchFeeAmount($settings, $webSearchCallCount);
@@ -995,12 +1053,15 @@ class AIModel extends Entity
     }
 
     /**
-     * Calculates input token cost, applying cached token discount when available.
+     * Calculates input token cost, applying cached token discount when available and the write premium on the
+     * uncached tokens written to the prompt cache.
      *
      * @param AILanguageModelSetting $settings Model settings
      * @param int $promptTokens Total prompt tokens
      * @param int $cachedInputTokens Tokens served from cache
      * @param float $fullInputRate Full input rate per 1K tokens
+     * @param int $cacheWriteTokens Uncached tokens written to the cache (capped at the uncached tokens)
+     * @param string $cacheWriteTtl The lifetime of those writes
      * @return float Input cost in USD
      */
     protected function calculateInputCost(
@@ -1008,7 +1069,11 @@ class AIModel extends Entity
         int $promptTokens,
         int $cachedInputTokens,
         float $fullInputRate,
+        int $cacheWriteTokens = 0,
+        string $cacheWriteTtl = self::PROMPT_CACHE_WRITE_TTL_DEFAULT,
     ): float {
+        $cachedCost = 0.0;
+        $nonCachedTokens = $promptTokens;
         if (
             $cachedInputTokens > 0
             && $settings->costsPer1000KCachedInputTokens !== null
@@ -1017,10 +1082,13 @@ class AIModel extends Entity
             // Guard against API returning cachedInputTokens > promptTokens
             $actualCached = min($cachedInputTokens, $promptTokens);
             $nonCachedTokens = max(0, $promptTokens - $actualCached);
-            return ($nonCachedTokens / 1000) * $fullInputRate
-                + ($actualCached / 1000) * $cachedRate;
+            $cachedCost = ($actualCached / 1000) * $cachedRate;
         }
-        return ($promptTokens / 1000) * $fullInputRate;
+        $writtenTokens = min(max(0, $cacheWriteTokens), $nonCachedTokens);
+        $writePriceMultiplier = $this->getPromptCacheWritePriceMultiplier($cacheWriteTtl) ?? 1.0;
+        return (($nonCachedTokens - $writtenTokens) / 1000) * $fullInputRate
+            + ($writtenTokens / 1000) * $fullInputRate * $writePriceMultiplier
+            + $cachedCost;
     }
 
     /**

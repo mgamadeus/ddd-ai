@@ -1367,6 +1367,13 @@ return [
             'costsPer1000InputTokensInUSD' => 0.0002,
             'costsPer1000OuputTokensInUSD' => 0.0012,
             'costsPer1000CachedInputTokensInUSD' => 0.00002,
+            // breakpoint caching: the provider writes at the end of the latest message or at explicit
+            // prompt_cache_breakpoint markers; a write costs 1.25x the input rate (30 min), 2.5x with ttl 12h
+            'promptCacheMode' => AIModel::PROMPT_CACHE_MODE_EXPLICIT_BREAKPOINTS,
+            'promptCacheWritePriceMultipliers' => [
+                AIModel::PROMPT_CACHE_WRITE_TTL_DEFAULT => 1.25,
+                AIModel::PROMPT_CACHE_WRITE_TTL_TWELVE_HOURS => 2.5,
+            ],
         ],
     ],
     AIModel::MODEL_OPENAI_GPT6_SOL => [
@@ -1410,6 +1417,13 @@ return [
             'costsPer1000InputTokensInUSD' => 0.002,
             'costsPer1000OuputTokensInUSD' => 0.01,
             'costsPer1000CachedInputTokensInUSD' => 0.0002,
+            // breakpoint caching: the provider writes at the end of the latest message or at explicit
+            // prompt_cache_breakpoint markers; a write costs 1.25x the input rate (30 min), 2.5x with ttl 12h
+            'promptCacheMode' => AIModel::PROMPT_CACHE_MODE_EXPLICIT_BREAKPOINTS,
+            'promptCacheWritePriceMultipliers' => [
+                AIModel::PROMPT_CACHE_WRITE_TTL_DEFAULT => 1.25,
+                AIModel::PROMPT_CACHE_WRITE_TTL_TWELVE_HOURS => 2.5,
+            ],
         ],
     ],
     AIModel::MODEL_OPENAI_GPT6_LUNA => [
@@ -1461,6 +1475,13 @@ return [
             'costsPer1000InputTokensInUSD' => 0.0001,
             'costsPer1000OuputTokensInUSD' => 0.0005,
             'costsPer1000CachedInputTokensInUSD' => 0.00001,
+            // breakpoint caching: the provider writes at the end of the latest message or at explicit
+            // prompt_cache_breakpoint markers; a write costs 1.25x the input rate (30 min), 2.5x with ttl 12h
+            'promptCacheMode' => AIModel::PROMPT_CACHE_MODE_EXPLICIT_BREAKPOINTS,
+            'promptCacheWritePriceMultipliers' => [
+                AIModel::PROMPT_CACHE_WRITE_TTL_DEFAULT => 1.25,
+                AIModel::PROMPT_CACHE_WRITE_TTL_TWELVE_HOURS => 2.5,
+            ],
         ],
     ],
     AIModel::MODEL_GOOGLE_GEMINI_3_5_FLASH => [

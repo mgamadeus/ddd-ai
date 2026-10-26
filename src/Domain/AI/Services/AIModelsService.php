@@ -12,6 +12,8 @@ use DDD\Domain\AI\Entities\Models\Settings\AIImageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AILanguageModelSetting;
 use DDD\Domain\AI\Entities\Models\Settings\AIModelAgenticUseCaseConfig;
 use DDD\Domain\AI\Entities\Models\Settings\AIModelProviderFilters;
+use DDD\Domain\AI\Entities\Models\Settings\PromptCacheWritePrice;
+use DDD\Domain\AI\Entities\Models\Settings\PromptCacheWritePrices;
 use DDD\Domain\AI\Entities\Models\Settings\RequestFeeVariant;
 use DDD\Domain\AI\Entities\Models\Settings\RequestFeeVariants;
 use DDD\Domain\AI\Entities\Models\Selection\AgentEligibleModel;
@@ -236,6 +238,19 @@ class AIModelsService extends Service
                         new MoneyAmount((float)$amount, 'USD')
                     );
                     $aiModelSetting->costsPerRequestVariants->add($feeVariant);
+                }
+            }
+
+            if (isset($settings['promptCacheMode'])) {
+                $aiModelSetting->promptCacheMode = (string)$settings['promptCacheMode'];
+            }
+
+            $promptCacheWritePriceMultipliers = $settings['promptCacheWritePriceMultipliers'] ?? null;
+            if (is_array($promptCacheWritePriceMultipliers) && $promptCacheWritePriceMultipliers !== []) {
+                $aiModelSetting->promptCacheWritePrices = new PromptCacheWritePrices();
+                foreach ($promptCacheWritePriceMultipliers as $ttl => $priceMultiplier) {
+                    $promptCacheWritePrice = new PromptCacheWritePrice((string)$ttl, (float)$priceMultiplier);
+                    $aiModelSetting->promptCacheWritePrices->add($promptCacheWritePrice);
                 }
             }
 
