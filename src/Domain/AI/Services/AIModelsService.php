@@ -466,8 +466,15 @@ class AIModelsService extends Service
         }
         $this->recordDecision($decision);
 
+        // This service is a shared container instance: the flag holds for this one lookup only, so a later caller's
+        // getAIModelByName() still returns null on an unknown name instead of throwing.
+        $throwErrorsBeforeLookup = $this->throwErrors;
         $this->throwErrors = true;
-        return $this->getAIModelByName($decision->modelName);
+        try {
+            return $this->getAIModelByName($decision->modelName);
+        } finally {
+            $this->throwErrors = $throwErrorsBeforeLookup;
+        }
     }
 
     /** Drop the per-process selection cache (e.g. eval/calibration runs that mutate the catalog between selections). */
@@ -826,12 +833,18 @@ class AIModelsService extends Service
         $setClass = DDDService::instance()->getContainerServiceClassNameForClass(AIModels::class);
         /** @var AIModels $set */
         $set = new $setClass();
+        // shared container instance: the flag holds for these lookups only (see selectModel())
+        $throwErrorsBeforeLookups = $this->throwErrors;
         $this->throwErrors = true;
-        foreach ($candidates as $candidate) {
-            $model = $this->getAIModelByName($candidate->name);
-            if ($model !== null) {
-                $set->add($model);
+        try {
+            foreach ($candidates as $candidate) {
+                $model = $this->getAIModelByName($candidate->name);
+                if ($model !== null) {
+                    $set->add($model);
+                }
             }
+        } finally {
+            $this->throwErrors = $throwErrorsBeforeLookups;
         }
         return $set;
     }
